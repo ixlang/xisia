@@ -1,0 +1,1176 @@
+
+package Xisia
+{
+	static class comSyntax
+	{
+
+
+
+		public static String CurrentSection = "";
+		public static String CurrentModule = "";
+
+		public static void DirectiveModule()
+		{
+			String ModName = "";
+			if (comParser.IsIdent("module"))
+			{
+				comParser.SkipIdent();
+				CurrentModule = comParser.StringExpression();
+				comParser.Terminator();
+			}
+		}
+
+		public static void DirectiveApplication()
+		{
+			if (comParser.IsIdent("application"))
+			{
+				comCompiler.bLibrary = false;
+				comParser.SkipIdent();
+				if (comParser.IsIdent("PE"))
+				{
+					comParser.SkipIdent();
+					if (comParser.IsIdent("GUI"))
+					{
+						comParser.SkipIdent();
+						comLinker.AppType = comLinker.ENUM_APP_TYPE.GUI;
+					}
+					else if (comParser.IsIdent("CUI"))
+					{ 
+						comParser.SkipIdent();
+						comLinker.AppType = comLinker.ENUM_APP_TYPE.CUI;
+					}
+					else
+					{
+						comSummary.ErrMessage("invalid format '" + comParser.Identifier() + "' expected 'GUI' or 'CUI'");
+						return;
+					}
+					comParser.SkipBlank();
+					if (comParser.IsIdent("DLL"))
+					{
+						comParser.SkipIdent();
+						comExports.IsDLL = true;
+					}
+					if (comParser.IsIdent("entry"))
+					{
+						DeclareEntryPoint();
+					}
+					else
+					{
+						comParser.Terminator();
+					}
+				}
+				else
+				{
+					comSummary.ErrMessage("expected 'PE' but found '" + comParser.Identifier() + "'");
+					return;
+				}
+			}
+			else if (comParser.IsIdent("library"))
+			{ 
+				comParser.SkipIdent();
+				comCompiler.bLibrary = true;
+				comParser.SkipBlank();
+				comCompiler.LibraryName = comParser.StringExpression();
+				comParser.Terminator();
+			}
+			else
+			{
+				comSummary.ErrMessage("expected 'application' or 'library' but found '" + comParser.Identifier() + "'");
+				return;
+			}
+		}
+
+		public static void EntryBlock()
+		{
+			if ((comParser.EntryPoint .equals( "") == false)  || (comParser.EntryPoint .equals( "entry")))
+			{
+				return;
+			}
+			String Ident = comParser.Identifier();
+			if (Ident .equals( "entry"))
+			{
+				comSymbols.AddSymbol("$entry", comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			}
+			else
+			{
+				comSummary.ErrMessage("expected 'entry' but found '" + Ident + "'");
+				return;
+			}
+			comParser.CodeBlock();
+			Ident = comParser.Identifier();
+			if (Ident .equals( "end.") == false)
+			{
+				comSummary.ErrMessage("expected 'end.' but found '" + Ident + "'");
+				return;
+			}
+			else
+			{
+				comAssembler.Push(0);
+				comAssembler.InvokeByName("ExitProcess");
+			}
+		}
+
+		public static void DeclareEntryPoint()
+		{
+			comParser.SkipIdent();
+			comParser.EntryPoint = comParser.Identifier();
+			comParser.Terminator();
+		}
+
+		public static void DirectiveSection()
+		{
+			String Ident = "";
+			comLinker.ENUM_SECTION_TYPE ST = (comLinker.ENUM_SECTION_TYPE) 0;
+			comLinker.ENUM_SECTION_CHARACTERISTICS CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) 0;
+
+			String Name = comParser.StringExpression();
+			if (!comLinker.SectionExists(Name))
+			{
+                comParser.Blank();
+                Ident = comParser.Identifier();
+
+                switch(Ident.lower())
+                {
+                    case "data" :  
+                        ST = comLinker.ENUM_SECTION_TYPE.Data;  
+                        //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                        CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_INITIALIZED_DATA)); 
+                        break;
+                    case "code" :  
+                        ST = comLinker.ENUM_SECTION_TYPE.Code;  
+                        //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                        CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_CODE)); 
+                        break;
+                    case "import" :  
+                        ST = comLinker.ENUM_SECTION_TYPE.Import; 
+                        break;
+                    case "export" :  
+                        ST = comLinker.ENUM_SECTION_TYPE.Export; 
+                        break;
+                    case "resource" :  
+                        ST = comLinker.ENUM_SECTION_TYPE.Resource; 
+                        break;
+                    default:
+                        comSummary.ErrMessage("invalid section type '" + Ident + "'");  
+                        return;
+                }
+
+                while (comParser.IsSymbol(" "))
+                {
+        
+                    comParser.Blank();
+                    Ident = comParser.Identifier();
+
+                    switch(Ident.lower())
+                    {
+                        case "code" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_CODE)); 
+                            break;
+                        case "data" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_INITIALIZED_DATA)); 
+                            break;
+                        case "udata" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_UNINITIALIZED_DATA)); 
+                            break;
+                        case "discardable" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_DISCARDABLE)); 
+                            break;
+                        case "executable" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_EXECUTE)); 
+                            break;
+                        case "notchached" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_NOT_CHACHED)); 
+                            break;
+                        case "notpaged" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_NOT_PAGED)); 
+                            break;
+                        case "readable" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_READ)); 
+                            break;
+                        case "shared" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_SHARED)); 
+                            break;
+                        case "writeable" :  
+                            //UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+                            CH = (comLinker.ENUM_SECTION_CHARACTERISTICS) (((int) CH) + ((int) comLinker.ENUM_SECTION_CHARACTERISTICS.CH_MEM_WRITE)); 
+                            break;
+                        default:
+                            comSummary.ErrMessage("invalid characteristic '" + Ident + "'");  
+                            return;
+                    }
+                }
+
+                CurrentSection = Name;
+            }
+	
+			CreateSection(Name, ST, CH);
+			comParser.Terminator();
+			comParser.CodeBlock();
+		}
+
+		public static void CreateSection(String Name, comLinker.ENUM_SECTION_TYPE SectionType, comLinker.ENUM_SECTION_CHARACTERISTICS Characteristics)
+		{
+			int i = 0;
+			if (comLinker.SectionExists(Name))
+			{
+				CurrentSection = comLinker.Section[comLinker.SectionID(Name)].Name;
+			}
+			else
+			{
+				comLinker.Section = ArraysHelper<comLinker.TYPE_SECTION>.RedimPreserve(comLinker.Section, new comLinker.TYPE_SECTION[comLinker.Section.length + 1]);
+				comLinker.Section[comLinker.Section.length - 1].Bytes = new byte[1];
+				comLinker.Section[comLinker.Section.length - 1].Name = Name;
+				comLinker.Section[comLinker.Section.length - 1].SectionType = SectionType;
+				comLinker.Section[comLinker.Section.length - 1].Characteristics = Characteristics;
+			}
+		}
+
+		public static void DeclareLabel(String Name)
+		{
+			comSymbols.AddSymbol(Name, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.Symbol(":");
+		}
+
+		public static void StatementGoto()
+		{
+			comAssembler.ExprJump(comParser.Identifier());
+			comParser.Terminator();
+			comParser.CodeBlock();
+		}
+
+		public static void DeclareString(String CurrentType , bool FrameExpression , bool NoCodeBlock )
+		{
+			int Space = 0;
+			String Value = "";
+
+			String Ident = comParser.Identifier();
+			//UPGRADE_WARNING: (1068) Switch() of type Variant is being forced to String. More Information: https://docs.mobilize.net/vbuc/ewis#1068
+			String FullName = ((CurrentType.length() == 0) ? Ident : ((CurrentType.length() != 0) ? CurrentType + "." + Ident : ""));
+
+			if (comParser.IsSymbol("="))
+			{
+				comParser.Symbol("=");
+				Value = comParser.StringExpression();
+			}
+			else
+			{
+				Value = "";
+			}
+			if (comParser.IsSymbol("["))
+			{
+				comParser.Symbol("[");
+				Space = (comParser.NumberExpression().parseInt());
+				comParser.Symbol("]");
+			}
+			else
+			{
+				Space = 256;
+			}
+
+			if (comParser.IsSymbol("("))
+			{
+				comParser.Symbol("(");
+				if (!comParser.IsSymbol(")"))
+				{
+					if (comFrames.CurrentFrame .equals(""))
+					{
+						comSummary.ErrMessage("you cannot dimension the array outside of a frame. use '()' instead and \"reserve " + FullName + "([Size])\" inside a frame.");
+						return;
+					}
+				}
+				comData.DeclareDataString(FullName, Value, Space);
+				comMemory.ReserveArray(FullName, (int)(comParser.NumberExpression()));
+				comParser.Symbol(")");
+			}
+
+			if (!FrameExpression)
+			{
+				comParser.Terminator();
+				if (!comSymbols.SymbolExists(FullName))
+				{
+					comData.DeclareDataString(FullName, Value, Space);
+				}
+			}
+			else
+			{
+				if (!comSymbols.SymbolExists(comFrames.CurrentFrame + "." + FullName))
+				{
+					//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021
+					comSymbols.AddSymbol(comFrames.CurrentFrame + "." + FullName, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_STRING, false);
+					comFrames.AddFrameDeclare(FullName);
+				}
+			}
+
+			if (!NoCodeBlock)
+			{
+				comParser.CodeBlock();
+			}
+		}
+
+		public static void DeclareVariable(String CurrentType , String Size , bool FrameExpression , bool NoCodeBlock )
+		{
+			double Value = 0;
+
+			String Ident = comParser.Identifier();
+
+			//UPGRADE_WARNING: (1068) Switch() of type Variant is being forced to String. More Information: https://docs.mobilize.net/vbuc/ewis#1068
+			String FullName = ((CurrentType.length() == 0) ? Ident : ((CurrentType.length() != 0) ? CurrentType + "." + Ident : ""));
+
+			if (comParser.IsSymbol("="))
+			{
+				comParser.Symbol("=");
+				Value = (double) comParser.NumberExpression();
+			}
+			else
+			{
+				Value = 0;
+			}
+
+			if (comParser.IsSymbol("("))
+			{
+				comParser.Symbol("(");
+				if (!comParser.IsSymbol(")"))
+				{
+					if (comFrames.CurrentFrame .equals(""))
+					{
+						comSummary.ErrMessage("you cannot dimension the array outside of a frame. use '()' instead and \"reserve " + FullName + "([Size])\" inside a frame.");
+						return;
+					}
+				}
+				if (comParser.UnsignedDeclare)
+				{
+					switch(Size)
+					{
+						case "byte" :  
+							comData.DeclareDataUnsignedByte(FullName, (byte)(Value)); 
+							break;
+						case "word" :  
+							comData.DeclareDataUnsignedWord(FullName, (int)(Value)); 
+							break;
+						default: 
+							comSummary.ErrMessage("invalid size '" + FullName + "'");  
+							return;
+					}
+				}
+				else
+				{
+					switch(Size)
+					{
+						case "byte" :  
+							comData.DeclareDataByte(FullName, (byte)(Value)); 
+							break;
+						case "word" :  
+							comData.DeclareDataWord(FullName, (int)(Value)); 
+							break;
+						case "dword" :  
+							comData.DeclareDataDWord(FullName, (int)(Value)); 
+							break;
+						case "single" :  
+							comData.DeclareDataSingle(FullName, Value); 
+							break;
+						default: 
+							comSummary.ErrMessage("invalid size '" + FullName + "'");  
+							return;
+					}
+				}
+				comMemory.ReserveArray(FullName, (int)(comParser.NumberExpression()));
+				comParser.Symbol(")");
+			}
+
+			if (!FrameExpression)
+			{
+				if (!comSymbols.SymbolExists(FullName))
+				{
+					if (comParser.UnsignedDeclare)
+					{
+						switch(Size)
+						{
+							case "byte" :  
+								comData.DeclareDataUnsignedByte(FullName, (byte)(Value)); 
+								break;
+							case "word" :  
+								comData.DeclareDataUnsignedWord(FullName, (int)(Value)); 
+								break;
+							default: 
+								comSummary.ErrMessage("invalid size '" + FullName + "'");  
+								return;
+						}
+					}
+					else
+					{
+						switch(Size)
+						{
+							case "byte" :  
+								comData.DeclareDataByte(FullName, (byte)(Value)); 
+								break;
+							case "word" :  
+								comData.DeclareDataWord(FullName, (int)(Value)); 
+								break;
+							case "dword" :  
+								comData.DeclareDataDWord(FullName, (int)(Value)); 
+								break;
+							case "single" :  
+								comData.DeclareDataSingle(FullName, Value); 
+								break;
+							default: 
+								comSummary.ErrMessage("invalid size '" + FullName + "'");  
+								return;
+						}
+					}
+				}
+				if (comParser.IsSymbol(","))
+				{
+					comParser.Symbol(",");
+					DeclareVariable(CurrentType, Size, FrameExpression, false);
+					return;
+				}
+				comParser.Terminator();
+			}
+			else
+			{
+				if (!comSymbols.SymbolExists(comFrames.CurrentFrame + "." + FullName))
+				{
+					switch(Size)
+					{
+						case "single" :  
+							//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+							comSymbols.AddSymbol(comFrames.CurrentFrame + "." + FullName, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_SINGLE, false); 
+							break;
+						default: 
+							//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021 
+							comSymbols.AddSymbol(comFrames.CurrentFrame + "." + FullName, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_DWORD, false); 
+							break;
+					}
+					comFrames.AddFrameDeclare(Ident);
+				}
+			}
+			if (!NoCodeBlock)
+			{
+				comParser.CodeBlock();
+			}
+		}
+
+		public static void DeclareLocal()
+		{
+			Object Value = nilptr;
+			int Space = 0;
+			int ArrayValue = 0;
+
+			String Ident = comParser.Identifier();
+			String IdentII = comParser.Identifier();
+
+			if (comFrames.CurrentFrame .equals(""))
+			{
+				comSummary.ErrMessage("cannot declare local variable '" + IdentII + "' outside of a frame");
+				return;
+			}
+
+			if (Ident  .equals( "byte" )|| Ident  .equals( "word") || Ident  .equals( "bool" )|| Ident  .equals( "dword") || Ident  .equals( "boolean"))
+			{
+				//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021
+				comSymbols.AddSymbol(comFrames.CurrentFrame + "." + IdentII, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_DWORD, false);
+				comFrames.ArgCount++;
+			}
+			else if (Ident  .equals( "single"))
+			{ 
+				//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021
+				comSymbols.AddSymbol(comFrames.CurrentFrame + "." + IdentII, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_SINGLE, false);
+				comFrames.ArgCount++;
+			}
+			else if (Ident  .equals( "string"))
+			{ 
+				if (comParser.IsSymbol("["))
+				{
+					comParser.Symbol("[");
+					Space = (comParser.NumberExpression().parseInt());
+					comParser.Symbol("]");
+				}
+				else
+				{
+					Space = 256;
+				}
+				//UPGRADE_WARNING: (6021) Casting 'int' to Enum may cause different behaviour. More Information: https://docs.mobilize.net/vbuc/ewis#6021
+				comSymbols.AddSymbol(comFrames.CurrentFrame + "." + IdentII, 8 + (comFrames.ArgCount * 4), (comLinker.ENUM_SECTION_TYPE) 0, comSymbols.ENUM_SYMBOL_TYPE.ST_LOCAL_STRING, false);
+				comExpressions.eUniqueID++;
+				comData.DeclareDataString("Local.String" + comExpressions.eUniqueID, "", Space);
+				comAssembler.MovEAXAddress("Local.String" + comExpressions.eUniqueID);
+				//mov [ebp+number],eax
+				comCompiler.AddCodeWord(0x8589);
+				comCompiler.AddCodeDWord(8 + (comFrames.ArgCount * 4));
+				comFrames.ArgCount++;
+			}
+			else
+			{
+				comSummary.ErrMessage("expected identifier 'byte','word','dword','single' or 'String' but found" + Ident);
+				return;
+			}
+
+			comParser.Terminator();
+
+
+			comParser.CodeBlock();
+		}
+
+		public static void DeclareConstant()
+		{
+			String Name = comParser.Identifier();
+			comParser.Symbol("=");
+			comParser.SkipBlank();
+			if (comParser.IsStringExpression())
+			{
+				comSymbols.AddConstant(Name, comParser.StringExpression());
+			}
+			else if (comParser.IsNumberExpression())
+			{ 
+				comSymbols.AddConstant(Name, "" + comParser.NumberExpression());
+			}
+			else if (comParser.IsConstantExpression())
+			{ 
+				comSymbols.AddConstant(Name, "" + comParser.ConstantExpression());
+			}
+			else
+			{
+				comSummary.ErrMessage("invalid constant value. '" + Name + " '");
+				return;
+			}
+			comParser.Terminator();
+			comParser.CodeBlock();
+		}
+
+		public static void DeclareType()
+		{
+			String Name = "";
+			String Ident = "";
+			String TypeSource = "";
+
+            comTypes.Types = ArraysHelper<comTypes.TYPE_TYPE>.RedimPreserve(comTypes.Types, new comTypes.TYPE_TYPE[comTypes.Types.length + 1]);
+			comTypes.Types[comTypes.Types.length - 1].Name = comParser.Identifier();
+
+			comParser.Symbol("{");
+
+			while (!comParser.IsSymbol("}"))
+			{
+				comParser.SkipBlank();
+				if (comParser.IsIdent("string") || comParser.IsIdent("dword") || comParser.IsIdent("word") || comParser.IsIdent("byte") || comParser.IsIdent("bool") || comParser.IsIdent("boolean") || comParser.IsIdent("single"))
+				{
+					TypeSource = TypeSource + (comParser.Identifier() + " " + comParser.Identifier());
+					if (comParser.IsSymbol("["))
+					{
+						comParser.Symbol("[");
+						TypeSource = TypeSource + ("[");
+						TypeSource = TypeSource + ("" + comParser.NumberExpression() + "]");
+						comParser.Symbol("]");
+					}
+					else if (comParser.IsSymbol("("))
+					{ 
+						comParser.Symbol("(");
+						TypeSource = TypeSource + ("(");
+						comParser.Symbol(")");
+						TypeSource = TypeSource + (")");
+					}
+					TypeSource = TypeSource + (";");
+					comParser.Terminator();
+					comParser.SkipBlank();
+				}
+				else
+				{
+					Ident = comParser.Identifier();
+					if (comTypes.IsType(Ident))
+					{
+						TypeSource = TypeSource + (Ident + " " + comParser.Identifier());
+						TypeSource = TypeSource + (";");
+						comParser.Terminator();
+						comParser.SkipBlank();
+					}
+					else
+					{
+						comParser.Symbol("}");
+						return;
+					}
+				}
+			}
+			comTypes.Types[comTypes.Types.length - 1].Source = TypeSource;
+			comParser.Symbol("}");
+			comParser.CodeBlock();
+		}
+
+		public static void StatementInclude()
+		{
+			String FileName = comParser.StringExpression();
+			comParser.Position = comParser.Position - (Strings.Len(FileName)) - 2;
+            int start = Math.max(FileName.length() - 4, 0);
+			if (FileName.substring(start, FileName.length()) .equals( ".lib"))
+			{
+				comImports.ImportLibrary();
+			}
+			else
+			{
+				IncludeFile();
+			}
+		}
+
+        public static String getFileContent(String file){
+            FileInputStream fis = new FileInputStream(file);
+            byte [] data  = fis.read();
+            fis.close();
+            return new String(data);
+        }
+		public static void IncludeFile()
+		{
+			int i = 0;
+			String[] Files = {""};
+			String Content = "";
+
+	
+			for (;;){
+                Files = StringArraysHelper.RedimPreserve(Files, new String[Files.length + 1]);
+                Files[Files.length - 1] = comParser.StringExpression();
+                if (comParser.IsSymbol(","))
+                {
+                    comParser.Position++;
+                    comParser.SkipBlank();
+                }else{
+                    break;
+                }
+            }
+			comParser.Terminator();
+
+			for (i = Files.length - 1; i >= 1; i--)
+			{
+				Content = getFileContent(_system_.getAppDirectory().appendPath("include").appendPath(Files[i]));
+				comParser.InsertSource(Content);
+				comSummary.LenIncludes += Content.length();
+			}
+			comParser.CodeBlock();
+		}
+
+		public static void StatementIf()
+		{
+			int iID = 0;
+			iID += comData.lUniqueID;
+			comData.lUniqueID++;
+			int elseifcount = 0;
+
+			comParser.Symbol("(");
+
+			comExpressions.Expression("$Intern.Compare.One");
+			comExpressions.Expression("$Intern.Compare.Two");
+
+			if (comExpressions.IsStringCompare)
+			{
+				comAssembler.ExprCompareS("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+			else
+			{
+				comAssembler.ExprCompare("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+
+			comExpressions.ChooseRelation(iID, "$else");
+			comParser.Symbol(")");
+			comParser.Symbol("{");
+			comSymbols.AddSymbol("$then" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+			comAssembler.ExprJump("$out" + iID);
+			comParser.Symbol("}");
+			comParser.SkipBlank();
+			if (comParser.IsIdent("else"))
+			{
+				comParser.SkipIdent();
+				comParser.Symbol("{");
+				comSymbols.AddSymbol("$else" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+				comParser.CodeBlock();
+				comParser.Symbol("}");
+			}
+			else
+			{
+				comSymbols.AddSymbol("$else" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			}
+			comSymbols.AddSymbol("$out" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+		}
+
+		public static void StatementWhile()
+		{
+			int wID = 0;
+			wID += comData.lUniqueID;
+			comData.lUniqueID++;
+			comParser.Symbol("(");
+
+			comSymbols.AddSymbol("$swhile" + wID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+
+			comExpressions.Expression("$Intern.Compare.One");
+			comExpressions.Expression("$Intern.Compare.Two");
+
+			if (comExpressions.IsStringCompare)
+			{
+				comAssembler.ExprCompareS("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+			else
+			{
+				comAssembler.ExprCompare("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+
+			comExpressions.ChooseRelation(wID, "$endwhile");
+
+			comParser.Symbol(")");
+			comParser.Symbol("{");
+
+			comSymbols.AddSymbol("$while" + wID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+			comAssembler.ExprJump("$swhile" + wID);
+			comParser.Symbol("}");
+			comParser.SkipBlank();
+
+			comSymbols.AddSymbol("$endwhile" + wID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+		}
+
+		public static void StatementFor()
+		{
+			int fID = 0;
+			fID += comData.lUniqueID;
+			comData.lUniqueID++;
+			String sExpression = "";
+
+			comParser.Symbol("(");
+
+			String Ident = comParser.Identifier();
+			comParser.SkipBlank();
+			if (comParser.IsSymbol("("))
+			{
+				comMemory.SetArray(Ident);
+			}
+			else
+			{
+				if (comParser.IsVariable(Ident))
+				{
+					EvalVariable(Ident, true);
+				}
+				else if (comFrames.IsLocalVariable(Ident))
+				{ 
+					EvalLocalVariable(Ident, true);
+				}
+			}
+
+			comExpressions.IsStringCompare = false;
+			comSymbols.AddSymbol("$sfor" + fID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+
+			comExpressions.Expression("$Intern.Compare.One");
+			comExpressions.Expression("$Intern.Compare.Two");
+
+			if (comExpressions.IsStringCompare)
+			{
+				comAssembler.ExprCompareS("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+			else
+			{
+				comAssembler.ExprCompare("$Intern.Compare.One", "$Intern.Compare.Two");
+			}
+
+
+			comExpressions.ChooseRelation(fID, "$endfor");
+			comParser.Terminator();
+
+			while (!comParser.IsSymbol(")"))
+			{
+				sExpression = sExpression + (comParser.Source.substring(comParser.Position - 1,comParser.Position - 1 +  Math.min(1, comParser.Source.length() - (comParser.Position - 1))));
+
+				if (comParser.IsSymbol("("))
+				{
+					comParser.Position++;
+					while (!comParser.IsSymbol(")"))
+					{
+						sExpression = sExpression + (comParser.Source.substring(comParser.Position - 1,comParser.Position - 1 +  Math.min(1, comParser.Source.length() - (comParser.Position - 1))));
+						comParser.Position++;
+					}
+					sExpression = sExpression + (comParser.Source.substring(comParser.Position - 1, comParser.Position - 1 + Math.min(1, comParser.Source.length() - (comParser.Position - 1))));
+				}
+				if (comParser.Position >= Strings.Len(comParser.Source))
+				{
+					comSummary.ErrMessage("found end of code. but expected ')' or ','");
+					return;
+				}
+				comParser.Position++;
+			}
+			comParser.Symbol(")");
+			comParser.Symbol("{");
+			comSymbols.AddSymbol("$for" + fID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+			comParser.InsertSource(sExpression + ";");
+			comParser.CodeBlock();
+			comAssembler.ExprJump("$sfor" + fID);
+			comParser.Symbol("}");
+			comParser.SkipBlank();
+			comSymbols.AddSymbol("$endfor" + fID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			comParser.CodeBlock();
+		}
+
+		public static void StatementLoop()
+		{
+			String Ident = "";
+			int iID = 0;
+
+			iID += comData.lUniqueID;
+			comData.lUniqueID++;
+
+			String Mode = comParser.Identifier();
+
+			if (Mode.equals( "until"))
+			{
+				comParser.Symbol("(");
+				comExpressions.Expression("$Intern.Compare.One");
+				comExpressions.Expression("$Intern.Compare.Two");
+				comParser.Symbol(")");
+
+				comSymbols.AddSymbol("$loop" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+				comParser.Symbol("{");
+				comParser.CodeBlock();
+				comParser.Symbol("}");
+
+				comAssembler.ExprCompare("$Intern.Compare.One", "$Intern.Compare.Two");
+				comExpressions.ChooseRelation(iID, "$loop");
+
+				comSymbols.AddSymbol("$loopout" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+			}
+			else if (Mode.equals(  "down") || Mode .equals(""))
+			{ 
+				comParser.Symbol("(");
+				comExpressions.Expression("");
+				comAssembler.PopECX();
+				if (comParser.IsSymbol(","))
+				{
+					comParser.Skip(0);
+					Ident = comParser.Identifier();
+				}
+				comParser.Symbol(")");
+
+				comSymbols.AddSymbol("$loop" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+
+				comParser.Symbol("{");
+				comParser.CodeBlock();
+				comParser.Symbol("}");
+				comAssembler.DecECX();
+
+				if (Ident .length() != 0)
+				{
+					//mov [Variable],ecx
+					comCompiler.AddCodeWord(0xD89);
+					comFixups.AddCodeFixup(Ident);
+				}
+
+				//cmp ecx,0
+				comCompiler.AddCodeWord(0xF983);
+				comCompiler.AddCodeByte(0);
+				comAssembler.ExprJA("$loop" + iID);
+			}
+			else if (Mode  .equals( "up"))
+			{ 
+				comCompiler.AddCodeByte(0xB9);
+				comCompiler.AddCodeDWord(0); //mov ecx,0
+
+				comParser.Symbol("(");
+				comExpressions.Expression("$Intern.Count");
+				if (comParser.IsSymbol(","))
+				{
+					comParser.Skip(0);
+					Ident = comParser.Identifier();
+				}
+				comParser.Symbol(")");
+
+				comSymbols.AddSymbol("$loop" + iID, comLinker.OffsetOf(".code"), comLinker.ENUM_SECTION_TYPE.Code, comSymbols.ENUM_SYMBOL_TYPE.ST_LABEL, false);
+
+				comParser.Symbol("{");
+				comParser.CodeBlock();
+				comParser.Symbol("}");
+				comAssembler.IncECX();
+
+				if (Ident .length() != 0)
+				{
+					//mov [Variable],ecx
+					comCompiler.AddCodeWord(0xD89);
+					comFixups.AddCodeFixup(Ident);
+				}
+
+				//cmp ecx,[variable]
+				comCompiler.AddCodeWord(0xD3B);
+				comFixups.AddCodeFixup("$Intern.Count");
+				comAssembler.ExprJL("$loop" + iID);
+			}
+			else
+			{
+				comSummary.ErrMessage("expected loop 'up' or 'down' but found '" + Mode + "'");
+				return;
+			}
+
+			comParser.CodeBlock();
+		}
+
+		public static void StatementDirect()
+		{
+			String AddrIdent = "";
+
+			String Variable = "";
+
+			comParser.Symbol("[");
+			String Ident = comParser.Identifier();
+			for (;;){
+                if (Ident  .equals( "single"))
+                {
+                    comCompiler.AddCodeSingle((double) comParser.NumberExpression());
+                }
+                else if (Ident  .equals( "dword"))
+                { 
+                    comCompiler.AddCodeDWord((int)(comParser.NumberExpression()));
+                }
+                else if (Ident  .equals( "word"))
+                { 
+                    comCompiler.AddCodeWord(comMath.LoWord((int)(comParser.NumberExpression())));
+                }
+                else if (Ident  .equals( "byte"))
+                { 
+                    comCompiler.AddCodeByte(comMath.LoByte(comMath.LoWord((int)(comParser.NumberExpression()))));
+                }
+                else if (Ident  .equals( "address"))
+                { 
+                    AddrIdent = comParser.Identifier();
+                    comFixups.AddCodeFixup(AddrIdent);
+                }
+                else
+                {
+                    comSummary.ErrMessage("data type must be specified 'single', 'dword', 'word', 'byte', 'address'");
+                }
+                comParser.SkipBlank();
+                if (comParser.IsSymbol(","))
+                {
+                    comParser.Position++;
+                }else{
+                    break;
+                }
+            }
+			comParser.Symbol("]");
+			comParser.Terminator();
+			comParser.CodeBlock();
+		}
+
+		public static void StatementBytes()
+		{
+			int bByte = 0;
+			String Ident = comParser.Identifier();
+			comParser.Symbol("[");
+			for (;;){
+                comCompiler.AddDataByte((byte)(comParser.NumberExpression()));
+                if (comParser.IsSymbol("@"))
+                {
+                    comParser.Position++;
+                    comSymbols.AddSymbol(Ident, comLinker.OffsetOf(".data"), comLinker.ENUM_SECTION_TYPE.Data, comSymbols.ENUM_SYMBOL_TYPE.ST_DWORD, false);
+                }
+                if (comParser.IsSymbol(","))
+                {
+                    comParser.Position++;
+                }else{
+                    break;
+                }
+            }
+			comParser.Symbol("]");
+			comParser.Terminator();
+			comParser.CodeBlock();
+		}
+
+		public static void EvalVariable(String Name, bool OnlySet )
+		{
+			comParser.SkipBlank();
+
+			if (comParser.IsSymbol("("))
+			{
+				comMemory.SetArray(Name);
+				comParser.Terminator();
+				comParser.CodeBlock();
+				return;
+			}
+
+			if (comParser.IsSymbol("="))
+			{
+				comParser.Symbol("=");
+				comExpressions.Expression(Name);
+			}
+			else if (comParser.IsSymbol("+"))
+			{ 
+				comParser.Symbol("+");
+				if (comParser.IsSymbol("+"))
+				{
+					comParser.Symbol("+");
+					//inc [Variable]
+					comCompiler.AddCodeWord(0x5FF);
+					comFixups.AddCodeFixup(Name);
+				}
+				else
+				{
+					//add [Name],Value
+					comCompiler.AddCodeWord(0x581);
+					comFixups.AddCodeFixup(Name);
+					comCompiler.AddCodeDWord((int)(comParser.NumberExpression()));
+				}
+			}
+			else if (comParser.IsSymbol("-"))
+			{ 
+				comParser.Symbol("-");
+				if (comParser.IsSymbol("-"))
+				{
+					comParser.Symbol("-");
+					//dec [Variable]
+					comCompiler.AddCodeWord(0xDFF);
+					comFixups.AddCodeFixup(Name);
+				}
+				else
+				{
+					//sub [Name],Value
+					comCompiler.AddCodeWord(0x2D81);
+					comFixups.AddCodeFixup(Name);
+					comCompiler.AddCodeDWord((int)(comParser.NumberExpression()));
+				}
+			}
+			comParser.Terminator();
+			if (!OnlySet)
+			{
+				comParser.CodeBlock();
+			}
+		}
+
+		public static void EvalLocalVariable(String Name, bool OnlySet )
+		{
+			int iLabel = 0;
+			comParser.SkipBlank();
+			if (comParser.IsSymbol("="))
+			{
+				comParser.Symbol("=");
+				comExpressions.Expression("");
+				comAssembler.PopEAX();
+			}
+			else if (comParser.IsSymbol("+"))
+			{ 
+				comParser.Symbol("+");
+				//mov eax, [ebp+number]
+				comCompiler.AddCodeWord(0x858B);
+				comCompiler.AddCodeDWord(comSymbols.GetSymbolOffset(comFrames.CurrentFrame + "." + Name));
+				comCompiler.AddCodeByte(0x5);
+				if (comParser.IsSymbol("+"))
+				{
+					comParser.Symbol("+");
+					comCompiler.AddCodeDWord(0x1);
+				}
+				else
+				{
+					comCompiler.AddCodeDWord((int)(comParser.NumberExpression()));
+				}
+			}
+			else if (comParser.IsSymbol("-"))
+			{ 
+				comParser.Symbol("-");
+				comCompiler.AddCodeWord(0x858B);
+				comCompiler.AddCodeDWord(comSymbols.GetSymbolOffset(comFrames.CurrentFrame + "." + Name));
+				comCompiler.AddCodeByte(0x2D);
+				if (comParser.IsSymbol("-"))
+				{
+					comParser.Symbol("-");
+					comCompiler.AddCodeDWord(0x1);
+				}
+				else
+				{
+					comCompiler.AddCodeDWord((int)(comParser.NumberExpression()));
+				}
+			}
+
+			//mov [ebp+number], eax
+			comCompiler.AddCodeWord(0x8589);
+			comCompiler.AddCodeDWord(comSymbols.GetSymbolOffset(comFrames.CurrentFrame + "." + Name));
+			comParser.Terminator();
+			if (!OnlySet)
+			{
+				comParser.CodeBlock();
+			}
+		}
+
+		public static void StatementWith()
+		{
+			comParser.WithIdent = comParser.Identifier();
+			comParser.Symbol("{");
+			comParser.CodeBlock();
+			comParser.Symbol("}");
+			comParser.WithIdent = "";
+			comParser.CodeBlock();
+		}
+
+		public static void DeclareImport()
+		{
+			String FunctionName = "";
+			String Library = "";
+			int ParamCount = 0;
+
+			String FunctionAlias = "";
+			String Ident = comParser.Identifier();
+			String OIdent = comParser.Identifier();
+
+			if (OIdent  .equals( "alias"))
+			{
+				FunctionAlias = Ident;
+				FunctionName = comParser.Identifier();
+				OIdent = comParser.Identifier();
+			}
+			else
+			{
+				FunctionAlias = Ident;
+				if (OIdent  .equals( "ascii"))
+				{
+					OIdent = comParser.Identifier();
+					FunctionName = Ident + "A";
+				}
+				else if (OIdent  .equals( "unicode"))
+				{ 
+					OIdent = comParser.Identifier();
+					FunctionName = Ident + "W";
+				}
+				else
+				{
+					FunctionName = Ident;
+				}
+			}
+
+			if (OIdent  .equals( "lib") || OIdent  .equals( "library"))
+			{
+				Library = comParser.StringExpression();
+			}
+			else
+			{
+				comSummary.ErrMessage("expected 'lib' but found '" + Ident + "'");
+				return;
+				return;
+			}
+
+			if (comParser.IsSymbol(","))
+			{
+				comParser.Position++;
+				ParamCount = (int)(comParser.NumberExpression());
+			}
+			else
+			{
+				ParamCount = 0;
+			}
+
+			comParser.Terminator();
+
+			comImports.AddImport(FunctionName, Library, ParamCount, FunctionAlias,false);
+
+			comParser.CodeBlock();
+
+		}
+	};
+};

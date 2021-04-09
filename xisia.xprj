@@ -1,0 +1,69 @@
+{
+	"xisia":	{
+		"version":	"1.2",
+		"language":	"xlang",
+		"sources":	["xisia.x", ".\\Modules\\Assembler.x", ".\\Modules\\Compiler.x", ".\\Modules\\DataManager.x", ".\\Modules\\Exports.x", ".\\Modules\\Expressions.x", ".\\Modules\\Fixups.x", ".\\Modules\\Func.x", ".\\Modules\\Imports.x", ".\\Modules\\Linker.x", ".\\Modules\\Math.x", ".\\Modules\\Memory.x", ".\\Modules\\Optimize.x", ".\\Modules\\Parser.x", ".\\Modules\\Protos.x", ".\\Modules\\Resources.x", ".\\Modules\\Summary.x", ".\\Modules\\Symbols.x", ".\\Modules\\Syntax.x", ".\\Modules\\Types.x", ".\\Modules\\General.x", ".\\Modules\\ObjScan.x", ".\\Modules\\Sort.x", ".\\Modules\\VirtualFiles.x", ".\\Modules\\ArraysHelper.x", ".\\Modules\\Strings.x", ".\\version.version", ".\\Modules\\BytesBuffer.x", ".\\Modules\\ObjectArray.x"],
+		"configures":	{
+			"debug":	{
+				"path":	{
+					"incpath":	[],
+					"libpath":	["libs"]
+				},
+				"options":	"",
+				"prebuild":	"",
+				"preclean":	"",
+				"makebuild":	"",
+				"makeclean":	"",
+				"afterbuild":	"",
+				"afterclean":	"",
+				"libs":	["FileStream_1.0.0.8.lix", "XPlatform_1.0.0.5.lix"],
+				"links":	[],
+				"depends":	[{
+						"name":	"FileStream",
+						"version":	"1.0.0.8"
+					}, {
+						"name":	"XPlatform",
+						"version":	"1.0.0.5"
+					}],
+				"cmd":	"$(Output)",
+				"args":	"$(Output) -e D:\\Cadaqs\\Desktop\\vbcc\\Examples\\New\\GUI\\OpenGL\\OpenGLMath_x.via -o D:\\Cadaqs\\Desktop\\VBcccc\\xl.exe",
+				"workdir":	"$(ProjectDir)",
+				"wtype":	"",
+				"ostype":	"",
+				"sstype":	"-console",
+				"outname":	"$(ProjectName)$(Ext)",
+				"outpath":	"$(ProjectDir)/$(Arch)/$(Configure)",
+				"command":	"-ce",
+				"uaclevel":	"默认",
+				"ignorewarning":	"",
+				"warexcp":	"",
+				"compdest":	"-z",
+				"ignorewl":	"",
+				"debugable":	"-dbg",
+				"debugdatabase":	"",
+				"warnilptr":	"",
+				"strlistfile":	"",
+				"languagefile":	"",
+				"stringoutput":	""
+			},
+			"release":	{
+				"path":	{
+					"incpath":	[],
+					"libpath":	[]
+				},
+				"libs":	[],
+				"options":	"-nd",
+				"command":	"-ce",
+				"debugable":	"",
+				"sstype":	"-console",
+				"outpath":	"$(ProjectDir)/$(Arch)/$(Configure)",
+				"outname":	"$(ProjectName)$(Ext)",
+				"cmd":	"$(Output)",
+				"args":	"$(Output)",
+				"workdir":	"$(ProjectDir)"
+			}
+		},
+		"icofile":	"output.ico",
+		"versioninc":	"0"
+	}
+}
