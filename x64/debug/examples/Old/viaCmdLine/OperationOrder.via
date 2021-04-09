@@ -1,0 +1,22 @@
+// OperationOrder.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+string buffer[256];
+
+frame main();
+    local dword x;
+    local dword y;
+    local dword sum;
+    local dword difference;
+    local dword product;
+    local dword quotient;
+
+    x = 9; y = 3;
+
+    sum = 1 + 2 / 3;
+    Format(buffer, "1 + 2 / 3 = %d", sum);
+    MessageBox(0, buffer, "MathOps", 0);
+end;

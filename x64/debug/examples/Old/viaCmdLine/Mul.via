@@ -1,0 +1,19 @@
+// Mul.lnl
+
+application PE GUI;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+entry
+    string strTmp[80];
+    dword dwM1; dword dwM2;
+    dword dwProduct;
+
+    dwM1 = 2; dwM2 = $FFFFFFFF;
+    dwProduct = dwM1 * dwM2;
+    Format(strTmp, "Multiplicand: %ld\nMultiplier: %ld",
+           dwM1, dwM2);
+    MessageBox(0, strTmp, "DBug", 0);
+    Format(strTmp, "Product: %ld", dwProduct);
+    MessageBox(0, strTmp, "DBug", 0);
+end.

@@ -1,0 +1,73 @@
+// GetComputer.lnl
+
+application PE GUI; 
+
+include "Windows.inc"; 
+
+OSVERSIONINFO OSInfo; 
+
+string sBuffer[256]; 
+
+entry 
+
+   dword dwSize=256; 
+
+// Get Computer Name .. 
+
+   GetComputerName(@sBuffer,@dwSize); 
+
+   MessageBox(0,sBuffer,"Computer Name..",$20); 
+
+// Get Windows Version .. 
+
+   OSInfo.dwOSVersionInfoSize = 148; GetVersionEx(OSInfo); 
+
+   Format(sBuffer,"%d.%d",OSInfo.dwMajorVersion,
+          OSInfo.dwMinorVersion); 
+   MessageBox(0,sBuffer,"Windows Version..",$20); 
+
+// Get User Name .. 
+
+   GetUserName(@sBuffer,@dwSize);
+   MessageBox(0,sBuffer,"User Name..",$20); 
+
+// Get Windows Directory .. 
+
+   GetWindowsDirectory(@sBuffer,256);
+   MessageBox(0,sBuffer,"Windows Directory..",$20); 
+
+// Get System Directory .. 
+
+   GetSystemDirectory(@sBuffer,256);
+   MessageBox(0,sBuffer,"System Directory..",$20); 
+
+// Time elapsed since last reboot ..
+
+   dword dwTickCount;
+   dword dwDays; dword dwHours; 
+   dword dwMinutes;  dword dwSeconds;
+
+   dwTickCount = GetTickCount();
+   dwSeconds = dwTickCount / 1000 % 60;
+   dwMinutes = dwTickCount / 60000 % 60;
+   dwHours = dwTickCount / 3600000 % 24;
+   dwDays = dwTickCount / 86400000;
+   Format(@sBuffer, "%s%d:%2.2d:%2.2d:%2.2d",
+          "Time elapsed since reboot = ",
+          dwDays, dwHours, dwMinutes, dwSeconds);
+   MessageBox(0,sBuffer,"Last reboot..",$20); 
+
+// Mouse present ..
+
+   dword dwIndex;
+
+   dwIndex = GetSystemMetrics(SM_CMOUSEBUTTONS);
+
+   if (dwIndex > 0) {
+       Format(@sBuffer, "Yes, %d Button", dwIndex);
+   }
+   else {
+       sBuffer = "No mouse";
+   }
+   MessageBox(0,sBuffer,"Mouse Present..",$20); 
+end.

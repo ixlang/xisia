@@ -1,0 +1,31 @@
+// Xor.lnl
+
+application PE GUI entry main;
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+frame main();
+    local string strMsg[128];
+    local dword x;
+    local dword y;
+    local dword z;
+
+    MessageBox(0, "Here." ,"Xor", $20);
+    Format(strMsg, "Bitwise Xor:\n1 ~ $FFFE = %lu", 1 ~ $FFFE);
+    MessageBox(0, strMsg, "Xor", $20);
+
+    x = $FF; y = 256; z = x ~ y;
+    Format(strMsg, "Bitwise Xor:\n%d ~ %d = %lu", x, y, z);     
+    MessageBox(0, strMsg, "Xor", $20);
+
+    Format(strMsg, "Bitwise Xor:\n1 ~ 3 = %lu", 1 ~ 3);
+    MessageBox(0, strMsg, "Xor", $20);
+
+    x = $FFFF; y = 8; z = x ~ y;
+    Format(strMsg, "Bitwise Xor:\n%x ~ %x = %x", x, y, z);     
+    MessageBox(0, strMsg, "Xor", $20);
+
+    z = z ~ y;
+    Format(strMsg, "Bitwise Xor:\n%x ~ %x = %x", x, y, z);     
+    MessageBox(0, strMsg, "Xor", $20);
+end;

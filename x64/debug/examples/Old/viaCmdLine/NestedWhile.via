@@ -1,0 +1,22 @@
+// NestedWhile.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+frame main();
+    local dword i;
+    local dword j;
+    local string strMsg[64];
+
+    i = 0; j=0;
+
+    while (i < 2) {
+        while (j < 2 ) {
+            Format(strMsg, "i = %d\nj = %d", i, j);
+            MessageBox(0, strMsg, "NestedWhile", 0);
+            j = j + 1;
+        } 
+    i = i + 1;
+    }
+end;

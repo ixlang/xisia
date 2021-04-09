@@ -1,0 +1,24 @@
+// Simpsons.lnl
+// Copyright by Mark Chipman 2005
+
+application PE GUI DLL;
+
+bitmap Apu,             ".\Res\Apu.bmp";
+bitmap Barney,          ".\Res\Barney.bmp";
+bitmap Bart,            ".\Res\Bart.bmp";
+bitmap Bob,             ".\Res\Bob.bmp";
+bitmap Burns,           ".\Res\Burns.bmp";
+bitmap Edna,            ".\Res\Edna.bmp";
+bitmap Grampa,          ".\Res\Grampa.bmp";
+bitmap Homer,           ".\Res\Homer.bmp";
+bitmap Lisa,            ".\Res\Lisa.bmp";
+bitmap Maggie,          ".\Res\Maggie.bmp";
+bitmap Marge,           ".\Res\Marge.bmp";
+bitmap Moe,             ".\Res\Moe.bmp";
+bitmap Ned,             ".\Res\Ned.bmp";
+bitmap Quimby,          ".\Res\Quimby.bmp";
+bitmap SantasLilHelper, ".\Res\SantasLilHelper.bmp";
+bitmap Skinner,         ".\Res\Skinner.bmp";
+bitmap Smithers,        ".\Res\Smithers.bmp";
+bitmap Wiggum,          ".\Res\Wiggum.bmp";
+bitmap Willie,          ".\Res\Willie.bmp";

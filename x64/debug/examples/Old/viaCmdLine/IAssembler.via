@@ -1,0 +1,35 @@
+// IAssembler.lnl
+
+application PE GUI;
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+dword i;
+
+func Inline();
+    dword Value=20;
+    dword StoreHere;
+    string buffer[200];
+
+    MessageBox(0,"Starting Inline Assembler","Libry",$20);
+
+    iassembler {
+        mov edx,0
+        mov eax,[Value]
+        add eax,20
+        mov ebx,2
+        idiv ebx
+        mov [StoreHere],eax
+    }
+    
+    if(StoreHere=20) {
+        Format(buffer,"We actually moved 'Value' into 'StoreHere'.\nBecause StoreHere = %d.",StoreHere);
+        MessageBox(0,buffer,"Libry",$20);
+    } else {
+        MessageBox(0,"Something was possibly wrong..","Libry",$20);
+    }
+end;
+
+entry
+    Inline();
+end.

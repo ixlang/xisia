@@ -1,0 +1,16 @@
+// Expressions.lnl
+
+application PE GUI entry main;
+
+frame main();
+
+local dword i; i = 20;
+local dword ii; ii = 40;
+
+    if (30*i=15*ii) {
+        MessageBox(0,"Expressions Work!","Nice..",$20);
+    }
+    if (20*40+2+50*4*33=7402) {
+        MessageBox(0,"Expressions work well!","Nice..",$20);
+    }
+end;

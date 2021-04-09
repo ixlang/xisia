@@ -1,0 +1,40 @@
+// MoreOperators.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+frame main();
+    local string strMsg[128];
+    local dword x;
+    local dword y;
+    local dword z;
+
+    Format(strMsg, "Shift Left:\n1 << 4 = %lu", 1 << 4);
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    x = 1;
+    Format(strMsg, "Shift Left:\n$80000000 << %d = %lu", x, $80000000 << x);     
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    Format(strMsg, "Shift Right:\n13 >> 2 = %lu", 13 >> 2);
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    x = 2;
+    Format(strMsg, "Shift Right:\n5 >> %d = %lu", x, 5 >> x);     
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    Format(strMsg, "Bitwise And:\n1 & 3 = %lu", 1 & 3);
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    x = $FF; y = 256; z = x & y;
+    Format(strMsg, "Bitwise And:\n%d & %d = %lu", x, y, z);     
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    Format(strMsg, "Bitwise Or:\n1 | 3 = %lu", 1 | 3);
+    MessageBox(0, strMsg, "MoreOperators", $20);
+
+    x = $FF; y = 256; z = x | y;
+    Format(strMsg, "Bitwise Or:\n%d | %d = %lu", x, y, z);     
+    MessageBox(0, strMsg, "MoreOperators", $20);
+end;

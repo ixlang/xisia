@@ -1,0 +1,17 @@
+// MultiplyExpressions.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+frame main();
+    local dword i;
+    i = MessageBox(0,
+                  "MsgBox returns '1' and is multiplied by 60 so i=60",
+                  "This..",$20) * 60;
+
+    if (i=60) {
+        MessageBox(0,"Thats why you can see this messagebox","So..",$20);
+    }
+end;
+

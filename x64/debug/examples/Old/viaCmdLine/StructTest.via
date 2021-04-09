@@ -1,0 +1,49 @@
+// StructTest.lnl 
+
+application PE GUI; 
+
+include "Windows.inc"; 
+
+entry 
+
+type myStruct { 
+   word wS1; 
+   word wS2; 
+   dword dwS3; 
+   dword dwS4; 
+   dword dwS5; 
+} 
+
+myStruct s; 
+myStruct cs; 
+string strMessage[128]; 
+
+s.wS1 = 1; 
+s.wS2 = 2; 
+s.dwS3 = 3; 
+s.dwS4 = 4; 
+s.dwS5 = 5; 
+
+    MoveMemory(@cs, @s, 16);  
+
+//    MoveMemory(@cs.wS1, @s.wS1, 2);  
+//    MoveMemory(@cs.wS2, @s.wS2, 2);  
+//    MoveMemory(@cs.dwS3, @s.dwS3, 4);  
+//    MoveMemory(@cs.dwS4, @s.dwS4, 4);  
+//    MoveMemory(@cs.dwS5, @s.dwS5, 4);  
+
+    Format(strMessage, "wS1: %d", cs.wS1); 
+    MessageBox(0, strMessage, "DBug", 0); 
+
+    Format(strMessage, "wS2: %d", cs.wS2); 
+    MessageBox(0, strMessage, "DBug", 0); 
+
+    Format(strMessage, "dwS3: %ld", cs.dwS3); 
+    MessageBox(0, strMessage, "DBug", 0); 
+
+    Format(strMessage, "dwS4: %ld", cs.dwS4); 
+    MessageBox(0, strMessage, "DBug", 0); 
+
+    Format(strMessage, "dwS5: %ld", cs.dwS5); 
+    MessageBox(0, strMessage, "DBug", 0); 
+end.

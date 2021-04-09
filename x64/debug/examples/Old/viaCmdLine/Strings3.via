@@ -1,0 +1,22 @@
+// Strings3.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+dword ret;
+dword style;
+
+frame main();
+    local string message[25];
+    local string caption[15];
+    message = "Libry.Compiler is great!";
+    caption = "Hello Planet!";
+    style = $24;
+
+    ret = MessageBox(0,message,caption,style);
+
+    if(ret=IDYES) {
+        MessageBox(0,"ID=YES","Return..",0);
+    }
+end;

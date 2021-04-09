@@ -1,0 +1,23 @@
+// Remainder.lnl
+
+application PE GUI;
+
+import MessageBox ascii lib "USER32.DLL",4; 
+
+frame div.mod();
+    local dword x; 
+    local dword y; 
+    local dword quotient; 
+    local dword modulus; 
+    local string buffer;
+
+    x=9; y=6; 
+    quotient = x/y; modulus = x%y;
+
+    Format(buffer,"%d / %d = %d mod %d",x,y,quotient,modulus);
+    MessageBox(0,buffer,"Divide and MOD",0); 
+end;
+
+entry
+    div.mod();
+end.

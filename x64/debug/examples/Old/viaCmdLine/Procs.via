@@ -1,0 +1,19 @@
+// Procs.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+frame hello();
+    MessageBox(0,"Hello World!","Template..",$20);
+    return(200);
+end;
+
+frame main();
+    dword ret;
+    MessageBox(0,"My World!","Template..",$20);
+    ret =	hello();
+    if(ret=200) {
+        MessageBox(0,"Pain World!","Template..",$20);
+   }
+end;

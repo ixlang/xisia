@@ -1,0 +1,102 @@
+// BackColor.lnl - Mark Chipman / Kinex
+
+application PE GUI entry main; 
+
+include "Windows.inc";
+
+const Black   = $00000000; const DkGray  = $00808080; 
+const LtGray  = $00C0C0C0; const White   = $00FFFFFF; 
+const Red     = $000000FF; const Green   = $0000FF00; 
+const Blue    = $00FF0000; const Yellow  = $0000FFFF; 
+const Magenta = $00FF00FF; const Cyan    = $00FFFF00;
+
+const WHITE_BRUSH = $0; 
+
+MSG myMsg; WNDCLASS wc;
+
+dword hWindow; dword hMenu; dword hMenuPopdown;
+dword dwColor; dword hBrush; string buffer[256]; 
+
+func WndProc(dword hwnd, dword message, dword wparam, dword lparam); 
+    if (message = WM_DESTROY) {PostQuitMessage(0);}
+    if (message = WM_COMMAND) {
+        if (wparam = 1011) {
+            PostMessage(hwnd, WM_CLOSE, 0, 0); 
+            return(0); 
+        }
+        if (wparam = 1001) {dwColor = Black;} 
+        if (wparam = 1002) {dwColor = DkGray;}
+        if (wparam = 1003) {dwColor = LtGray;}
+        if (wparam = 1004) {dwColor = White;} 
+        if (wparam = 1005) {dwColor = Red;} 
+        if (wparam = 1006) {dwColor = Green;} 
+        if (wparam = 1007) {dwColor = Blue;} 
+        if (wparam = 1008) {dwColor = Yellow;} 
+        if (wparam = 1009) {dwColor = Magenta;} 
+        if (wparam = 1010) {dwColor = Cyan;} 
+
+        hBrush = CreateSolidBrush(dwColor); 
+        SetClassLong(hwnd, GCL_HBRBACKGROUND, hBrush); 
+        InvalidateRect(hwnd, 0, 1); 
+        if (hBrush) {DeleteObject(hBrush);} 
+        return(0); 
+    } 
+    return(DefWindowProc(hwnd, message, wparam, lparam)); 
+end; 
+
+func main();  
+    wc.style = CS_HREDRAW + CS_VREDRAW; 
+    wc.lpfnWndProc = @WndProc; 
+    wc.cbClsExtra = 0; 
+    wc.cbWndExtra = 0; 
+    wc.hInstance = Instance; 
+    wc.hIcon = LoadIcon(0, IDI_APPLICATION); 
+    wc.hCursor = LoadCursor(0, IDC_ARROW); 
+    wc.hbrBackground = GetStockObject(WHITE_BRUSH); 
+    wc.lpszMenuName = ""; 
+    wc.lpszClassName = "BkgColorClass"; 
+
+    if (RegisterClass(wc) = 0) { 
+        MessageBox(0, "RegisterClass failed.", "BkgColor", 0); 
+        ExitProcess(0); 
+    } 
+    
+    hMenu = CreateMenu(); 
+    hMenuPopdown = CreateMenu(); 
+
+    AppendMenu(hMenuPopdown, MF_STRING, 1001, "Black"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1002, "Gray (Dark)"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1003, "Gray (Light)"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1004, "White"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1005, "Red"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1006, "Green"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1007, "Blue"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1008, "Yellow"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1009, "Magenta"); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1010, "Cyan"); 
+    AppendMenu(hMenuPopdown, MF_SEPARATOR, 0, ""); 
+    AppendMenu(hMenuPopdown, MF_STRING, 1011, "Exit"); 
+    AppendMenu(hMenu, MF_POPUP ,hMenuPopdown, "Color");        
+    
+    hWindow = CreateWindowEx($40000+$100, "BkgColorClass",
+                    "Background Color",
+                    $CF0000+$10000000, 
+                    100, 100, 400, 400,
+                    0, hMenu, Instance, 0);
+    
+    if (hWindow = 0) { 
+        MessageBox(0, "CreateWindowEx failed.", "BkgColor", 0); 
+        UnregisterClass("BkgColorClass", Instance); 
+        ExitProcess(0); 
+    } 
+
+    ShowWindow(hWindow, SW_SHOWNORMAL); 
+    UpdateWindow(hWindow); 
+
+    while (GetMessage(@myMsg, 0, 0, 0) > 0) { 
+        TranslateMessage(@myMsg); 
+        DispatchMessage(@myMsg); 
+    } 
+    
+    UnregisterClass("BkgColorClass", Instance); 
+end;

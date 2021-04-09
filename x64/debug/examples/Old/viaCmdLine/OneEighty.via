@@ -1,0 +1,12 @@
+// One Eighty test for expressions. The orders work right!
+
+application PE GUI;
+ 
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+dword i; string strMsg[128];
+
+entry
+    i = 5*(2*2+(2*(2+2)))*3;
+    Format(strMsg, "FxExpr:%d",i); MessageBox(0, strMsg, "Right", $20);
+end.

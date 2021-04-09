@@ -1,0 +1,159 @@
+application PE GUI entry main;
+
+include "Windows.inc", "Math.inc", "Strings.inc";
+
+import MessageBox ascii lib "USER32.DLL", 4;
+
+single fResult;
+dword dwResult;
+string strMsg;
+string strTitle;
+
+func main();
+
+    strTitle = "Math.inc Results";
+
+// StrF
+
+    Format(strMsg, "Now we can see 'Single' values! %s", StrF(1.23456));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Sin
+
+    fResult = Sin(4.71238898);
+    Format(strMsg, "Sin of 4.71238898 = %s", Sng2Str(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Cos
+
+    fResult = Cos(0.0);
+    Format(strMsg, "Cos of 0.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Tan
+
+    fResult = Tan(1.0);
+    Format(strMsg, "Tan of 1.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Pi
+
+    fResult = Pi();
+    Format(strMsg, "Pi = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// RadToDeg
+
+    fResult = RadToDeg(3.14159);
+    Format(strMsg, "RadToDeg of 3.14159 = %s", StrF(fResult));
+//    Format(strMsg, "RadToDeg 3.14159 = %s", StrF(RadToDeg(3.14159)));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// DegToRad
+
+    fResult = DegToRad(360.0);
+    Format(strMsg, "DegToRad of 360.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Frac
+
+    fResult = Frac(34.8179);
+    Format(strMsg, "Frac of 34.8179 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Float
+
+    fResult = Float(567);
+    Format(strMsg, "Float of 567 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Integer (Truncation towards zero)
+   
+    dwResult = Integer(86.7);
+    Format(strMsg, "Integer of 86.7 = %ld", dwResult);
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Round
+
+    dwResult = Round(2.5);
+    Format(strMsg, "Round of 2.5 = %ld", dwResult);
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Ceiling
+// Should be -2.  Will work when float compares are added to compiler.
+
+//    dwResult = Ceiling(-2.3);
+//    Format(strMsg, "Ceiling of -2.3 = %ld", dwResult);
+//    MessageBox(0, strMsg, strTitle, 0);
+
+// Floor
+   
+    dwResult = Floor(-2.0);
+    Format(strMsg, "Floor of -2.0 = %ld", dwResult);
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Trunc
+
+    fResult = Trunc(123.456);
+    Format(strMsg, "Trunc of 123.456 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// AbsF
+
+    fResult = AbsF(-331.2);
+    Format(strMsg, "AbsF of -331.2 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// SqrF
+
+    fResult = SqrF(105.0);
+    Format(strMsg, "SqrF of 105.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Ln
+
+    fResult = Ln(1567.22);
+    Format(strMsg, "Ln of 1567.22 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Log
+
+    fResult = Log(89.6);
+    Format(strMsg, "Log of 89.6 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Log2
+
+    fResult = Log2(0.25);
+    Format(strMsg, "Log of 0.25 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// LogN
+
+    fResult = LogN(4.0, 8.0);
+    Format(strMsg, "Log base 4.0 of 8.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// Exp
+
+    fResult = Exp(1.0);
+    Format(strMsg, "Exp of 1.0 = %s", StrF(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// PowF
+
+    fResult = PowF(2.0, 3.0);
+    Format(strMsg, "PowF with base 2.0 and exponent 3.0 = %s", Sng2Str(fResult));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// StrI
+
+    Format(strMsg, "Bonus Function: StrI result of $FFFFFFFF is %s", StrI($FFFFFFFF));
+    MessageBox(0, strMsg, strTitle, 0);
+
+// StrU
+
+    Format(strMsg, "Bonus Function: StrU result of $FFFFFFFF is %s", StrU($FFFFFFFF));
+    MessageBox(0, strMsg, strTitle, 0);
+end;
+

@@ -1,0 +1,90 @@
+// Rot13.lnl
+
+application PE GUI;
+
+include "Windows.inc";
+
+RECT r;
+RECT rEditor;
+MSG myMsg;
+WNDCLASS wc;
+
+dword Window;
+dword Editor;
+dword cmdROT;
+
+frame SizeEditor();
+    GetClientRect(Window,@r);
+    r.right = r.right - 10;
+    r.bottom = r.bottom - 70;
+    MoveWindow(Editor,5,5,r.right,r.bottom,1);
+    GetClientRect(Editor,rEditor);
+    rEditor.right = rEditor.right - 130;
+    rEditor.bottom = rEditor.bottom + 30;
+    MoveWindow(cmdROT,rEditor.right,rEditor.bottom,150,50,1);
+end;
+
+frame EnDecrypt();
+    string TextToCrypt[50];
+    GetWindowText(Editor,TextToCrypt,256);
+end;
+
+frame MainWndProc(dword hwnd,dword message,dword wparam,dword lparam);
+    if(message=WM_COMMAND) {
+        if(wparam=2) {
+            EnDecrypt();
+        }
+    }
+    if(message=$2) {
+        PostQuitMessage(0);
+    }
+    if(message=WM_SIZE) {
+        SizeEditor();
+    }
+    return(DefWindowProc(hwnd,message,wparam,lparam));
+end;
+
+frame CreateDialog(dword caption);
+    local dword Font;
+
+    wc.style = $2+$1+$80;
+    wc.lpfnWndProc = @MainWndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = 0;
+    wc.hIcon = LoadIcon(0,32512);
+    wc.hCursor = LoadCursor(0,$7F00);
+    wc.hbrBackground = 15+1;
+    wc.lpszMenuName = "";
+    wc.lpszClassName = "LinleyClass";
+
+    if(RegisterClass(wc)=0) {
+        MessageBox(0,"Failed to register window!","Linley",0);
+        ExitProcess(0);
+    }
+
+    Window = CreateWindowEx($40000+$100,"LinleyClass",@caption,$4000000+$2000000+$CF0000+$10000000,200,200,450,320,0,0,0,0);
+    Editor = CreateWindowEx($10000,"Edit","",$800000+$40000000+$10000000+ES_MULTILINE+ES_AUTOVSCROLL+ES_AUTOHSCROLL+WS_VSCROLL+WS_HSCROLL,5,5,200,200,Window,1,Instance,0);
+    cmdROT = CreateWindowEx($10000,"Button","En/Decrypt",$800000+$40000000+$10000000,5,5,200,200,Window,2,Instance,0);
+    Font = CreateFont(16,0,0,0,0,0,0,0,0,0,0,0,1+0,"Courier New");
+    SendMessage(Editor,$30,Font,0);
+    SendMessage(cmdROT,$30,Font,0);
+    SizeEditor();
+
+    if(Window=0) {
+        MessageBox(0,"Failed to create window!","Linley",0);
+        UnregisterClass("LinleyClass",Instance);
+        ExitProcess(0);
+    }
+
+    while(GetMessage(myMsg,0,0,0)<>0) {
+        TranslateMessage(@myMsg);
+        DispatchMessage(@myMsg);
+    }
+
+    UnregisterClass("LinleyClass",0);
+end;
+
+entry
+    CreateDialog("Linley.Example -> ROT 13");
+end.

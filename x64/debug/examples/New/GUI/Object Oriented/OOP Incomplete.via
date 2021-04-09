@@ -1,0 +1,101 @@
+//OOP Idea. Note that this doesn't work right now but if I get
+//these frames INTO the type and making them unique when you assign
+//the type then it is a start
+//Note the new func type 'property' (Form1.Left,Top)
+
+application PE GUI;
+
+include "Windows.inc", "Conversion.inc";
+
+type Form {
+	dword hwnd;
+	dword WndProc;
+	WINDOWPLACEMENT wp;
+	WNDCLASS wc;
+	MSG msg;
+}
+
+Form Form1;
+
+func Form1.Events(dword ptrWndProc);
+	Form1.WndProc = ptrWndProc;
+end;
+
+func Form1.Create();
+	with Form1.wc {
+		.style = CS_HREDRAW | CS_VREDRAW; 
+		.lpfnWndProc = Form1.WndProc; 
+		.cbClsExtra = 0; 
+		.cbWndExtra = 0; 
+		.hInstance = 0; 
+		.hIcon = LoadIcon(0, IDI_APPLICATION); 
+		.hCursor = LoadCursor(0, IDC_ARROW); 
+		.hbrBackground = 16;
+		.lpszMenuName = ""; 
+		.lpszClassName = "ViaClass";
+	}
+	RegisterClass(Form1.wc);
+	Form1.hwnd = CreateWindowEx(0,"ViaClass","Form1",WS_SYSMENU|WS_BORDER,CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,CW_USEDEFAULT,0,0,Instance,0);
+	ShowWindow(Form1.hwnd,SW_HIDE);
+end;
+
+func Form1.Show();
+	ShowWindow(Form1.hwnd,SW_SHOWNORMAL);
+end;
+
+property set Form1.Left(dword Value);
+	GetWindowPlacement(Form1.hwnd,Form1.wp);
+	MoveWindow(Form1.hwnd,Value, \
+			Form1.wp.rcNormalPosition.top, \
+			Form1.wp.rcNormalPosition.right - \
+			Form1.wp.rcNormalPosition.left, \
+			Form1.wp.rcNormalPosition.bottom - \
+			Form1.wp.rcNormalPosition.top, TRUE);
+end;
+
+property set Form1.Top(dword Value);
+	GetWindowPlacement(Form1.hwnd,Form1.wp);
+	MoveWindow(Form1.hwnd,Form1.wp.rcNormalPosition.left, \
+			Value, \
+			Form1.wp.rcNormalPosition.right - \
+			Form1.wp.rcNormalPosition.left, \
+			Form1.wp.rcNormalPosition.bottom - \
+			Form1.wp.rcNormalPosition.top, TRUE);
+end;
+
+property get Form1.Left();
+	GetWindowPlacement(Form1.hwnd,Form1.wp);
+	return(Form1.wp.rcNormalPosition.left);
+end;
+
+property get Form1.Top();
+	GetWindowPlacement(Form1.hwnd,Form1.wp);
+	return(Form1.wp.rcNormalPosition.top);
+end;
+
+func Form1.Events.Handler(dword hwnd,dword message,dword wparam,dword lparam);
+	if (message=WM_DESTROY) {
+		MessageBox(0,Int2Str(Form1.Left),"It works we see Form1.Left ;)",0);
+		MessageBox(0,Int2Str(Form1.Top),"It works we see Form1.Left ;)",0);
+		PostQuitMessage(0);
+	}
+	if (message=WM_MOUSEMOVE) {
+		if (wparam=1) {
+			Form1.Left = Form1.Left + 1;
+			Form1.Top = Form1.Top + 1;
+		}
+	}
+	DefWindowProc(hwnd,message,wparam,lparam);
+end;
+
+entry
+	Form1.Events(@Form1.Events.Handler);
+	Form1.Create();
+	Form1.Left = 50;
+	Form1.Show();
+	while (GetMessage(Form1.msg,0,0,0)<>0) {
+		TranslateMessage(Form1.msg);
+		DispatchMessage(Form1.msg);
+	}
+end.
+

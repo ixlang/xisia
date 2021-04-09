@@ -1,0 +1,68 @@
+application PE GUI;
+
+include "Windows.inc", "Math.inc","Conversion.inc";
+
+entry
+	CreateDialog();
+end.
+
+// Global Variables
+WNDCLASS wc;
+MSG msg;
+dword hWindow;
+dword i,ii;
+dword ptX,ptY;
+dword Width;
+dword Height;
+dword hdc;
+
+// Window Procedure to catch all Events raised by the Dialog
+func DialogProc(dword hwnd, dword message, dword wparam, dword lparam);
+	if (message = WM_DESTROY) { PostQuitMessage(0); }
+	if (message = WM_SIZE) {
+		Width = LoWord(lparam);
+		Height = HiWord(lparam);
+	}
+	if (message=WM_PAINT) {
+			i = 1;
+			ii = 1;
+			while (i<Width) {
+				ii = Sng2Int(Int2Sng(Height) / 2.0 * (1.0 - Sin(2.0 * Pi() * Int2Sng(i) / 200.0)));
+				SetPixel(hdc, i-ii, ii,i*200/Width);
+				i++;
+			}	
+	}
+	return(DefWindowProc(hwnd, message, wparam, lparam));
+end;
+
+// Create the Dialog and set DialogProc as WindowProc
+func CreateDialog();
+	with wc {
+		.style = CS_HREDRAW | CS_VREDRAW; 
+		.lpfnWndProc = @DialogProc; 
+		.cbClsExtra = 0; 
+		.cbWndExtra = 0; 
+		.hInstance = 0; 
+		.hIcon = LoadIcon(0, IDI_APPLICATION); 
+		.hCursor = LoadCursor(0, IDC_ARROW); 
+		.hbrBackground = $15;
+		.lpszMenuName = ""; 
+		.lpszClassName = "DialogClass";
+	}
+
+	RegisterClass(wc);
+
+	hWindow = CreateWindowEx(0, "DialogClass", "Dialog1", \
+                WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE |\
+                WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, \
+                200, 200, 400, 300, 0, 0, Instance, 0);
+	hdc = GetDC(hWindow);
+
+	while (GetMessage(msg, 0, 0, 0) <> 0) { 
+		TranslateMessage(msg); 
+		DispatchMessage(msg); 
+	} 
+
+	UnregisterClass("DialogClass", 0);
+
+end;

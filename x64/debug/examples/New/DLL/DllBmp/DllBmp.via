@@ -1,0 +1,214 @@
+// DllBmp.lnl - Use bitmap resources from a DLL.
+// Copyright by Mark Chipman 2005
+
+
+application PE GUI entry main;
+
+include "win32a.inc", "Conversion.inc";
+
+MSG msg;
+WNDCLASS wc;
+dword hWindow;
+dword hListbox;
+dword hBtnLoad;
+dword hBtnUnload;
+dword hStaticBmp;
+dword hBitmap;
+byte bLoaded;
+dword hModule;
+
+const IDC_LISTBOX = 101;
+const IDC_BTN_LOAD = 102;
+const IDC_BTN_UNLOAD = 103;
+
+string strTitle[21]; 
+string strClass[7];     
+
+frame CenterOnDesktop(dword hWindow);
+    local dword xPos; local dword yPos;
+    RECT rect;
+    GetWindowRect(hWindow, @rect);
+    xPos = (GetSystemMetrics(SM_CXSCREEN) - (rect.right - rect.left)) / 2;
+    yPos = (GetSystemMetrics(SM_CYSCREEN) - (rect.bottom - rect.top)) / 2;
+    SetWindowPos(hWindow, HWND_TOP, xPos, yPos, 0, 0, _
+                 SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+end;
+
+frame SetChildFonts(dword hControl, dword lParam);
+    SendMessage(hControl, WM_SETFONT, lParam, FALSE);
+    return(TRUE);
+end;
+
+frame EnumResNameProc(dword hMod, dword ptrType, dword ptrName, dword lParam);
+    string strResId[16];
+    if ((ptrName & $FFFF0000) = 0) {
+// Numeric resource type.
+        Format(@strResId, "%ld", ptrName);
+        SendMessage(hListbox, LB_ADDSTRING, 0, @strResId);
+    }
+    else {
+// String resource type.
+        SendMessage(hListbox, LB_ADDSTRING, 0, ptrName);
+    }
+    return(TRUE);
+end;
+
+frame Load();
+    dword i;
+    string strBuffer[512]; 
+
+    hModule = LoadLibrary("Simpsons.dll");
+
+    if (hModule <> 0) {
+        SendMessage(hListbox, LB_RESETCONTENT, 0, 0);
+        EnumResourceNames(hModule, RT_BITMAP, @EnumResNameProc, NULL); 
+        EnableWindow(hBtnLoad, FALSE);
+        EnableWindow(hBtnUnload, TRUE);
+        MessageBox(NULL, "Simpsons.dll loaded.", @strTitle, MB_OK);
+    }
+    else {
+        MessageBox(NULL, "Simpsons.dll load failed.", @strTitle, MB_OK);
+    }
+end;
+
+frame Unload();
+    FreeLibrary(hModule);
+    SendMessage(hListbox, LB_RESETCONTENT, 0, 0);
+    SendMessage(hStaticBmp, STM_SETIMAGE, IMAGE_BITMAP, NULL);
+    EnableWindow(hBtnLoad, TRUE);
+    EnableWindow(hBtnUnload, FALSE);
+    MessageBox(NULL, "Simpsons.dll unloaded.", @strTitle, MB_OK);
+end;
+
+frame ListBoxDblClick();
+    dword dwIndex;
+    string strText[80];
+    dwIndex = SendMessage(hListbox, LB_GETCURSEL, 0, 0);
+    if (dwIndex <> LB_ERR) {
+        SendMessage(hListbox, LB_GETTEXT, dwIndex, @strText);
+        dwIndex = CInt(@strText);
+        if (dwIndex <> 0) {
+            hBitmap = LoadBitmap(hModule, dwIndex);
+        }
+        else {
+            hBitmap = LoadBitmap(hModule, @strText);
+        }
+        SendMessage(hStaticBmp, STM_SETIMAGE, IMAGE_BITMAP, hBitmap);
+        DeleteObject(hBitmap);
+    }
+end;
+
+frame OnCreate(dword hwnd, dword message, dword wparam, dword lparam);
+    CreateWindowEx(0, "Button", "", _
+                   BS_GROUPBOX | WS_CHILD | WS_VISIBLE, _
+                   8, 8, 177, 209, hwnd, 0, $400000, 0);
+    hListbox = CreateWindowEx(0, "Listbox", "", _
+                   LBS_NOTIFY | LBS_SORT | WS_CHILD | WS_VISIBLE | WS_VSCROLL, _
+                   25, 24, 143, 140, hwnd, IDC_LISTBOX, $400000, 0);
+    hBtnLoad = CreateWindowEx(0, "Button", "Load", _
+                              BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, _
+                             25, 168, 70, 25, hwnd, 0, $400000, 0);
+    hBtnUnload = CreateWindowEx(0, "Button", "Unload", _
+                                BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, _
+                                98, 168, 70, 25, hwnd, 0, $400000, 0);
+    CreateWindowEx(0, "Button", "", _
+                   BS_GROUPBOX | WS_CHILD | WS_VISIBLE, _
+                   192, 8, 153, 209, hwnd, 0, $400000, 0);
+    hStaticBmp =  CreateWindowEx(0, "Static", 0, _
+                                 SS_BITMAP | WS_CHILD | WS_VISIBLE, _
+                                 245, 88, 48, 48, hwnd, 101, $400000, 0);
+    EnableWindow(hBtnUnload, FALSE);
+end;
+
+frame OnCommand(dword hwnd, dword message, dword wparam, dword lparam);
+    if (message = WM_COMMAND) {
+        if (lparam = hBtnLoad) {
+            Load();
+            return(0);
+        }
+        if (lparam = hBtnUnload) {
+            Unload();
+            return(0);
+        }
+        if (lparam = hListbox) {
+            if (HiWord(wparam) = LBN_DBLCLK) {
+                ListBoxDblClick();
+                return(0);
+            }
+        }
+    }
+    return(DefWindowProc(hwnd, message, wparam, lparam));
+end;
+
+frame OnDestroy(dword hwnd, dword message, dword wparam, dword lparam);
+    PostQuitMessage(0);
+    ExitProcess(0);
+end;
+
+frame WndProc(dword hwnd, dword message, dword wparam, dword lparam);
+    if (message = WM_PAINT) {
+        ListBoxDblClick();
+// Allow DefWindowProc here.        
+    }
+    if (message = WM_CREATE) {
+        return(OnCreate(hwnd, message, wparam, lparam));
+    }
+    if (message = WM_COMMAND) {
+        return(OnCommand(hwnd, message, wparam, lparam));
+    }
+    if (message = WM_DESTROY) {
+        return(OnDestroy(hwnd, message, wparam, lparam));
+    }
+    return(DefWindowProc(hwnd, message, wparam, lparam));
+end;
+
+frame main();
+    strTitle = "DllBmp Demonstration"; 
+    strClass = "DllBmp"; 
+
+    wc.style = CS_HREDRAW | CS_VREDRAW; 
+    wc.lpfnWndProc = @WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = $400000;
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION); 
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);     
+    wc.hbrBackground = COLOR_BTNFACE + 1;
+    wc.lpszMenuName = "";
+    wc.lpszClassName = @strClass;
+
+    if(RegisterClass(@wc) = 0) {
+        MessageBox(NULL, "RegisterClass failed.", @strTitle, MB_OK);
+        ExitProcess(0);
+    }
+
+    hWindow = CreateWindowEx(0, @strClass, @strTitle, _
+                             WS_OVERLAPPED | WS_CAPTION | _
+                             WS_SYSMENU | WS_THICKFRAME | _
+                             WS_MINIMIZEBOX, _
+                             0, 0, 362, 262, 0, 0, $400000, 0);
+
+    if (hWindow = 0) {
+        MessageBox(NULL, "CreateWindowEx failed.", @strTitle, MB_OK);
+        UnregisterClass(@strClass, $400000);
+        ExitProcess(0);
+    }
+
+    CenterOnDesktop(hWindow);
+    EnumChildWindows(hWindow, @SetChildFonts, GetStockObject(ANSI_VAR_FONT));
+
+    ShowWindow(hWindow, SW_SHOWNORMAL);
+    UpdateWindow(hWindow);
+
+    while(GetMessage(@msg, 0, 0, 0) <> 0) {
+        TranslateMessage(@msg);
+        DispatchMessage(@msg);
+    }
+
+    UnregisterClass(@strClass, 0);
+end;
+
+
+
+
+

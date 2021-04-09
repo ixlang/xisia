@@ -1,0 +1,28 @@
+// Delay.lnl
+
+application PE GUI;
+
+include "win32a.inc";
+
+MSG msg;
+
+frame DoEvents();
+    if(PeekMessage(@msg, NULL, 0, 0, FALSE)=TRUE) {
+        TranslateMessage(msg);
+        DispatchMessage(msg);
+    }
+end;
+
+frame Delay(dword MS);
+        dword Wait;
+        Wait = GetTickCount() + MS;
+        while (GetTickCount() < Wait) { DoEvents(); }
+end;
+
+entry
+
+    MessageBox(0,"Start..","Delay..",$20);
+    Delay(2000);
+    MessageBox(0,"..End!","Delay..",$20);
+
+end.

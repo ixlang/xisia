@@ -1,0 +1,35 @@
+// StringsAndConversion.lnl
+
+application PE GUI;
+
+include "Windows.inc", "Strings.inc", "Conversion.inc";
+
+dword dwNumber; string buffer; string sString;
+
+entry
+
+// Strings.inc .. with various variants of calling the fram es..
+
+    sString = Left("Left Mid Right",4);
+    MessageBox(0,sString,"Template..",$20);
+
+    MessageBox(0,Mid("Left Mid Right",6,3),"Template..",$20);
+
+    MessageBox(0,Right("Left Mid Right",5),"Template..",$20);
+
+    sString = "UPPER aNd lowercase";
+    sString = UCase(sString);
+    MessageBox(0,sString,"Template..",$20);
+
+    MessageBox(0,LCase("UPPER aNd lowercase"),"Template..",$20);
+
+
+// Conversion.inc .. with various variants of calling the fram es..
+
+    sString = CStr(123);
+    MessageBox(0,sString,"Template..",$20);
+
+    dwNumber = CInt("321");
+    MessageBox(0,CStr(dwNumber),"Template..",CInt("32"));
+end.
+

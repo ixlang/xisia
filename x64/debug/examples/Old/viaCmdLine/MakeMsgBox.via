@@ -1,0 +1,14 @@
+// MakeMsgBox.lnl
+
+application PE GUI;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+frame MsgBox(string message[50],dword style,string title[50]);
+    MessageBox(0,message,title,style);
+end;
+
+entry
+    dword style=$20;
+    MsgBox("message",style,"title");
+end.

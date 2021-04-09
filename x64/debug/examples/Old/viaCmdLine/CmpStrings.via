@@ -1,0 +1,16 @@
+// CmpStrings.lnl
+
+application PE GUI;
+
+string message;
+string messageII;
+
+entry
+    message = "Compare"; messageII = "Compare";
+    if (message = messageII) {
+        MessageBox(0,"Equal","Strings..",0);
+    } else {
+        MessageBox(0,"Not Equal","Strings..",0);
+    }
+
+end.

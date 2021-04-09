@@ -1,0 +1,20 @@
+// Constant.lnl
+
+application PE GUI;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+const a = 1;
+const b = a;
+const c = [a+b];
+const d = [c+c];
+const e = [a+b+c+d];
+const f = [e+1];
+
+entry
+
+// Raises an exception.. because f+c|b=7 and is treated as address..
+
+    MessageBox(0,f+c|b,"Template..",$20);
+
+end.

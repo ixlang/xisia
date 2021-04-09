@@ -1,0 +1,250 @@
+application PE GUI entry main;
+
+include "Windows.inc";
+
+
+// AnimateWindow (c) by Mark Chipman
+
+import srand lib "msvcrt.dll", 1;
+import rand lib "msvcrt.dll", 0;
+import StrToInt alias StrToIntA lib "shlwapi.dll", 1;
+
+const AW_HOR_POSITIVE = $1;
+const AW_HOR_NEGATIVE = $2;
+const AW_VER_POSITIVE = $4;
+const AW_VER_NEGATIVE = $8;
+const AW_CENTER = $10;
+const AW_HIDE = $10000;
+const AW_ACTIVATE = $20000;
+const AW_SLIDE = $40000;
+const AW_BLEND = $80000;
+const RAND_MAX = $7FFF;
+const IDI_APPICON = 101;
+
+MSG msg;
+WNDCLASS wc; 
+RECT rect; 
+
+string strTitle[15]; 
+string strTitleDemo[29]; 
+string strName[14]; 
+string strTime[5];
+
+dword hWindow;
+dword hDemoWindow;
+dword hEditTime;
+dword hBrushPrevious;
+dword hBtnShow;
+dword hBtnHide;
+dword dwFlags;
+dword dwTime;
+dword dwColor;
+    
+frame StrToNum(dword ptrString);
+    return(StrToInt(ptrString));
+end;
+
+frame SetChildFonts(dword hControl, dword lParam);
+    SendMessage(hControl, WM_SETFONT, lParam, FALSE);
+    return(TRUE);
+end;
+
+frame CenterOnDesktop(dword hWindow);
+    local dword xPos; local dword yPos;
+    GetWindowRect(hWindow, @rect);
+//    Change this when order of operations is released.
+    xPos = (GetSystemMetrics(SM_CXSCREEN) - (rect.right - rect.left)) / 2;
+    yPos = (GetSystemMetrics(SM_CYSCREEN) - (rect.bottom - rect.top)) / 2;
+
+    SetWindowPos(hWindow, HWND_TOP, xPos, yPos, 0, 0, _
+                 SWP_NOZORDER | SWP_NOSIZE | SWP_NOACTIVATE);
+end;
+
+frame IsChecked(dword hDlg, dword nIDDlgItem);
+    return(SendMessage(GetDlgItem(hWindow, nIDDlgItem), _
+                       BM_GETCHECK, 0, 0));
+end;
+
+frame CreateControls();
+    CreateWindowEx(0, "Button", "Effect", _
+                   BS_GROUPBOX | WS_CHILD | WS_VISIBLE, _
+                   10, 10, 230, 250, hWindow, 1, 0, 0);
+    CreateWindowEx(0, "Button", "None", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 30, 210, 20, hWindow, 101, 0, 0);
+    CreateWindowEx(0, "Button", "Slide left to right", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 50, 210, 20, hWindow, 102, 0, 0);
+    CreateWindowEx(0, "Button", "Slide right to left", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 70, 210, 20, hWindow, 103, 0, 0);
+    CreateWindowEx(0, "Button", "Slide top to bottom", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 90, 210, 20, hWindow, 104, 0, 0);
+    CreateWindowEx(0, "Button", "Slide bottom to top", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 110, 210, 20, hWindow, 105, 0, 0);
+    CreateWindowEx(0, "Button", "Slide diagonally top left to bottom right", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 130, 210, 20, hWindow, 106, 0, 0);
+    CreateWindowEx(0, "Button", "Slide diagonally bottom right to top left", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 150, 210, 20, hWindow, 107, 0, 0);
+    CreateWindowEx(0, "Button", "Slide diagonally top right to bottom left", _
+                   BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 170, 210, 20, hWindow, 108, 0, 0);
+    CreateWindowEx(0, "Button", "Slide diagonally bottom left to top right", _
+                  BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                  20, 190, 210, 20, hWindow, 109, 0, 0);
+    CreateWindowEx(0, "Button", "Expand/collapse from/to center", _
+                  BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                  20, 210, 210, 20, hWindow, 110, 0, 0);
+    CreateWindowEx(0, "Button", "Fade (Blend) in and out", _
+                  BS_AUTORADIOBUTTON | WS_CHILD | WS_VISIBLE, _
+                  20, 230, 210, 20, hWindow, 111, 0, 0);
+
+    CreateWindowEx(0, "Button", "Time", _
+                   BS_GROUPBOX | WS_CHILD | WS_VISIBLE, _
+                   10, 270, 230, 50, hWindow, 2, 0, 0);
+    CreateWindowEx(0, "Static", "Delay (milliseconds)", _
+                   SS_SIMPLE | WS_CHILD | WS_VISIBLE, _
+                   20, 290, 100, 20, hWindow, 121, 0, 0);
+    hEditTime = CreateWindowEx(WS_EX_CLIENTEDGE, "Edit", "", _
+                   ES_LEFT | ES_NUMBER | WS_CHILD | WS_VISIBLE, _
+                   130, 290, 100, 20, hWindow, 122, 0, 0);
+    SendMessage(hEditTime, EM_SETLIMITTEXT, 4, 0);
+    SetWindowText(hEditTime, "600");
+
+    CreateWindowEx(0, "Button", "Action", _
+                   BS_GROUPBOX | WS_CHILD | WS_VISIBLE, _
+                   10, 330, 230, 50, hWindow, 3, 0, 0);
+    hBtnShow = CreateWindowEx(0, "Button", "Show", _
+                   BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, _
+                   20, 350, 100, 20, hWindow, 131, 0, 0);
+    hBtnHide = CreateWindowEx(0, "Button", "Hide", _
+                   BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE, _
+                   130, 350, 100, 20, hWindow, 132, 0, 0);
+
+    EnableWindow(hBtnHide, FALSE);
+    CheckRadioButton(hWindow, 101, 111, 101);
+    EnumChildWindows(hWindow, @SetChildFonts, GetStockObject(ANSI_VAR_FONT));
+end;
+
+frame ShowAndHide(dword dwShowOrHide);
+    dwFlags = 0; dwTime = 0;
+    GetWindowText(hEditTime, @strTime, 5);
+    dwTime = StrToNum(@strTime);
+
+    if (dwShowOrHide = 0) { 
+        EnableWindow(hBtnShow, FALSE);
+        EnableWindow(hBtnHide, TRUE);
+        dwFlags = AW_ACTIVATE;
+        dwColor = 16 * rand() / RAND_MAX + 16777216;
+        DeleteObject(hBrushPrevious);
+        hBrushPrevious = CreateSolidBrush(dwColor); 
+        SetClassLong(hDemoWindow, GCL_HBRBACKGROUND, hBrushPrevious); 
+    }     
+   
+    if (dwShowOrHide = 1) { 
+        EnableWindow(hBtnShow, TRUE);
+        EnableWindow(hBtnHide, FALSE);
+        dwFlags = AW_HIDE; 
+    }     
+    
+    if (IsChecked(hWindow, 102) = BST_CHECKED) { dwFlags = dwFlags | AW_HOR_POSITIVE; }     
+    if (IsChecked(hWindow, 103) = BST_CHECKED) { dwFlags = dwFlags | AW_HOR_NEGATIVE; }     
+    if (IsChecked(hWindow, 104) = BST_CHECKED) { dwFlags = dwFlags | AW_VER_POSITIVE; }     
+    if (IsChecked(hWindow, 105) = BST_CHECKED) { dwFlags = dwFlags | AW_VER_NEGATIVE; }     
+    if (IsChecked(hWindow, 106) = BST_CHECKED) { dwFlags = dwFlags | AW_HOR_POSITIVE | AW_VER_POSITIVE; }     
+    if (IsChecked(hWindow, 107) = BST_CHECKED) { dwFlags = dwFlags | AW_VER_NEGATIVE | AW_HOR_NEGATIVE; }     
+    if (IsChecked(hWindow, 108) = BST_CHECKED) { dwFlags = dwFlags | AW_HOR_NEGATIVE | AW_VER_POSITIVE; }     
+    if (IsChecked(hWindow, 109) = BST_CHECKED) { dwFlags = dwFlags | AW_VER_NEGATIVE | AW_HOR_POSITIVE; }     
+    if (IsChecked(hWindow, 110) = BST_CHECKED) { dwFlags = dwFlags | AW_CENTER; }     
+    if (IsChecked(hWindow, 111) = BST_CHECKED) { dwFlags = dwFlags | AW_BLEND; }  
+
+    if (dwFlags = AW_ACTIVATE) {
+        ShowWindow(hDemoWindow, SW_SHOW);
+        return();
+    }
+
+    if (dwFlags = AW_HIDE) {
+        ShowWindow(hDemoWindow, SW_HIDE);
+        return();
+    }
+
+    AnimateWindow(hDemoWindow, dwTime, dwFlags);
+end;
+
+frame OnCommand(dword hwnd, dword message, dword wparam, dword lparam);
+    if (lparam = hBtnShow) { 
+        ShowAndHide(0);
+    }     
+    if (lparam = hBtnHide) { 
+        ShowAndHide(1);
+    }     
+    return(0);
+end;
+
+frame WndProc(dword hwnd, dword message, dword wparam, dword lparam); 
+    if (message = WM_COMMAND) {
+        return(OnCommand(hwnd, message, wparam, lparam));
+    }
+    if (message = WM_DESTROY) { 
+        ExitProcess(0); 
+    } 
+    return(DefWindowProc(hwnd, message, wparam, lparam));
+end; 
+
+frame main();  
+    strTitle = "Animate Window"; 
+    strTitleDemo = "Animate Window Demonstration"; 
+    strName = "AnimateWindow"; 
+
+    wc.style = CS_HREDRAW | CS_VREDRAW; 
+    wc.lpfnWndProc = @WndProc; 
+    wc.cbClsExtra = 0; 
+    wc.cbWndExtra = 0; 
+    wc.hInstance = 0; 
+    wc.hIcon = LoadIcon(0, IDI_APPICON); 
+    wc.hCursor = LoadCursor(0, IDC_ARROW); 
+    wc.hbrBackground = 15 + 1;
+    wc.lpszMenuName = ""; 
+    wc.lpszClassName = @strName;
+
+    if (RegisterClass(@wc) = 0) { 
+        MessageBox(0, "RegisterClass failed.", @strName, MB_OK); 
+        ExitProcess(0); 
+    } 
+
+    hWindow = CreateWindowEx(0, @strName, @strTitle, _
+                             WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU, _
+                             10, 10, 255, 425, 0, 0, 0, 0);
+
+    if (hWindow = 0) { 
+        MessageBox(0, "CreateWindowEx failed.", @strName, MB_OK); 
+        UnregisterClass(@strName, 0); 
+        ExitProcess(0); 
+    } 
+
+    ShowWindow(hWindow, SW_SHOWNORMAL); 
+    UpdateWindow(hWindow); 
+
+// WS_OVERLAPPEDWINDOW doesn't work.
+
+    hDemoWindow = CreateWindowEx(0, @strName, @strTitleDemo, _
+                                 WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | _
+                                 WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, _
+                                 0, 0, 350, 275, 0, 0, 0, 0);
+
+    InitCommonControls();
+    srand(GetTickCount());
+    CreateControls();
+    CenterOnDesktop(hDemoWindow);
+
+    while (GetMessage(@msg, 0, 0, 0) > 0) { 
+        TranslateMessage(@msg); 
+        DispatchMessage(@msg); 
+    } 
+
+    UnregisterClass(@strName, 0); 
+end;

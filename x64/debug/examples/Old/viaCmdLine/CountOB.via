@@ -1,0 +1,20 @@
+// CountOB.lnl
+
+application PE GUI; include "win32a.inc";
+
+dword i,StartPoint,RunTime,Remainder; string sBuffer;
+
+entry
+    MessageBox(0,"Starting While Loop..","Linley Compiler",$20);
+
+    StartPoint = GetTickCount();
+
+    while (i<1000000000) {
+         i++;
+    }
+
+    RunTime = (GetTickCount()-StartPoint)/1000;
+    Remainder = (GetTickCount()-StartPoint)%1000;
+    Format(sBuffer,"Time needed: %d.%d seconds.",RunTime,Remainder);
+    MessageBox(0,sBuffer,"Loop..",$20);
+end.

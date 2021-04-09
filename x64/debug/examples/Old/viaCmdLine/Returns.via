@@ -1,0 +1,14 @@
+// Returns.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+frame MsgBox(dword message,dword title,dword style);
+    MessageBox(0,message,title,style);
+end;
+
+frame main();
+    dword style=$20;
+    MsgBox("message","title",style);
+end;

@@ -1,0 +1,27 @@
+// Cursor.lnl
+
+application PE GUI;
+
+include "win32a.inc";
+
+type POINTAPI {
+    dword x;
+    dword y;
+}
+
+POINTAPI p; string buffer;
+
+entry
+
+    GetCursorPos(p);
+    Format(buffer,"x=%d : y=%d",p.x,p.y);
+    MessageBox(0,buffer,"Current Position",$20);
+
+    if (MessageBox(0,"Do you wan't to apply new coordinates?",
+        "New Position",$24)=IDYES) {
+        p.x = 200;
+        p.y = 200;
+        SetCursorPos(p.x,p.y);
+    }
+
+end.

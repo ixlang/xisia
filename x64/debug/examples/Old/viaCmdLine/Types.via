@@ -1,0 +1,34 @@
+// Types.lnl
+
+application PE GUI;
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+type person {
+    dword health;
+    string name[50];
+}
+
+person kinex;
+person bill;
+
+frame ShowTypes();
+    string buffer[50];
+
+    kinex.health = 100;     kinex.name = "Robert Stock";
+    bill.health = 10;       bill.name = "Bill Gates";
+
+    Format(buffer, 
+        "Person1.Name\t=\t%s\nPerson1.Health\t=\t%d", 
+        kinex.name,kinex.health);
+    MessageBox(0,buffer,"Person1",0);
+
+    Format(buffer,
+        "Person2.Name\t=\t%s\nPerson2.Health\t=\t%d",
+        bill.name,bill.health);
+    MessageBox(0,buffer,"Person2",0);
+end;
+
+entry
+    ShowTypes();
+end.

@@ -1,0 +1,27 @@
+// MathOps.lnl
+
+application PE GUI entry main; 
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+string buffer[256];
+
+frame main();
+    local dword x;
+    local dword y;
+    local dword sum;
+    local dword difference;
+    local dword product;
+    local dword quotient;
+
+    x = 9; y = 3;
+
+    sum = x + y;
+    difference = x - y;
+    product = x * y;
+    quotient = x / y;
+
+    Format(buffer, "9 + 3 = %d\n9 - 3 = %d\n9 * 3 = %d\n9 / 3 = %d", 
+           sum, difference, product, quotient);
+    MessageBox(0, buffer, "MathOps", 0);
+end;

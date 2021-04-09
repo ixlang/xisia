@@ -1,0 +1,19 @@
+// IfString1.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+string message[10];
+string messageII[10];
+
+frame main();
+
+    message = "Compare"; messageII = "Compare";
+
+    if(message=messageII) {
+        MessageBox(0,"Equal","Strings..",0);
+    } else {
+        MessageBox(0,"Not Equal","Strings..",0);
+    }
+end;

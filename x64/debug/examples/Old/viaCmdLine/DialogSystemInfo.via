@@ -1,0 +1,100 @@
+// DialogSystemInfo.lnl
+
+application PE GUI entry main;
+
+include "win32a.inc";
+
+type SYSTEM_INFO {
+    dword dwOemID;
+    dword dwPageSize;
+    dword lpMinimumApplicationAddress;
+    dword lpMaximumApplicationAddress;
+    dword dwActiveProcessorMask;
+    dword dwNumberOfProcessors;
+    dword dwProcessorType;
+    dword dwAllocationGranularity;
+    dword dwReserved;
+}
+
+MSG myMsg;
+WNDCLASS wc;
+SYSTEM_INFO SI;
+
+string buffer[256];
+dword LinleyWindow;
+
+frame MainWndProc(dword hwnd,dword message,dword wparam,dword lparam);
+    if(message=$2) {
+        PostQuitMessage(0);
+    }
+    if(message=$111) {
+        if(wparam=0) {
+            ExitProcess(0);
+        }
+    }
+    return(DefWindowProc(hwnd,message,wparam,lparam));
+end;
+
+frame AddStaticLabel(dword left,dword top,dword width,dword height,dword index);
+    dword hWnd;
+    hWnd = CreateWindowEx($40000,"Static","",$40000000+$10000000,left,top,width,height,LinleyWindow,index,Instance,0);
+    SendMessage(hWnd,$C,0,buffer);
+end;
+
+frame main();
+    wc.style = $2+$1+$80;
+    wc.lpfnWndProc = @MainWndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = 0;
+    wc.hIcon = LoadIcon(0,32514);
+    wc.hCursor = LoadCursor(0,$7F00);
+    wc.hbrBackground = 15+1;
+    wc.lpszMenuName = "";
+    wc.lpszClassName = "LinleyClass";
+
+    if(RegisterClass(wc)=0) {
+        MessageBox(0,"Failed to register window!","Linley",0);
+        ExitProcess(0);
+    }
+
+    LinleyWindow = CreateWindowEx($40000+$100,"LinleyClass","System Information",$4000000+$2000000+$CF0000+$10000000 - $10000,200,200,300,270,0,0,0,0);
+
+    if(LinleyWindow=0) {
+        MessageBox(0,"Failed to create window!","Linley",0);
+        UnregisterClass("LinleyClass",Instance);
+        ExitProcess(0);
+    }
+
+    GetSystemInfo(SI);
+    
+    Format(buffer,"OemID: %d",SI.dwOemID);
+    AddStaticLabel(10,10,300,50,0);
+    Format(buffer,"PageSize: %d",SI.dwPageSize);
+    AddStaticLabel(10,30,300,50,1); 
+    Format(buffer,"MinimumApplicationAddress: %d",SI.lpMinimumApplicationAddress);
+    AddStaticLabel(10,50,300,50,2);
+    Format(buffer,"MaximumApplicationAddress: %d",SI.lpMaximumApplicationAddress);
+    AddStaticLabel(10,70,300,50,3);
+    Format(buffer,"ActiveProcessorMask: %d",SI.dwActiveProcessorMask);
+    AddStaticLabel(10,90,300,50,4);
+    Format(buffer,"NumberOfProcessors: %d",SI.dwNumberOfProcessors);
+    AddStaticLabel(10,110,300,50,5);
+    Format(buffer,"ProcessorType: %d",SI.dwProcessorType);
+    AddStaticLabel(10,130,300,50,6);
+    Format(buffer,"AllocationGranularity: %d",SI.dwAllocationGranularity);
+    AddStaticLabel(10,150,300,50,7);
+    Format(buffer,"Reserved: %d",SI.dwReserved);
+    AddStaticLabel(10,170,300,50,8);
+    
+    CreateWindowEx($40000,"Button","Exit",$40000000+$10000000,10,200,270,30,LinleyWindow,0,Instance,0);
+
+    while(GetMessage(myMsg,0,0,0)<>0) {
+        TranslateMessage(@myMsg);
+        DispatchMessage(@myMsg);
+    }
+
+    UnregisterClass("LinleyClass",0);
+
+end;
+

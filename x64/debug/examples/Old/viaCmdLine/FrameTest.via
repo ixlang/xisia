@@ -1,0 +1,18 @@
+// FrameTest.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+dword x;
+
+frame MsgBoxInt(dword x);
+    local string strMsg[128];
+    Format(strMsg, "Value = %d", x);     
+    MessageBox(0,strMsg,"Result",$20);
+end;
+
+frame main();
+    x = 2;
+    MsgBoxInt(x);
+end;

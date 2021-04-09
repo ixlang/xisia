@@ -1,0 +1,9 @@
+// Greetings.lnl
+
+application PE GUI;
+
+include "Windows.inc";
+
+entry
+    MessageBox(NULL, "Greetings", "Linley 4.8.2", MB_OK);
+end.

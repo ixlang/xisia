@@ -1,0 +1,108 @@
+// SineWave.lnl (Based on a Petzold example) 
+// Made for Visia Compiler by Mark Chipman
+// Edited by Kinex
+
+application PE GUI entry main;
+
+include "Windows.inc", "Conversion.inc", "Math.inc";
+
+string strTitle[15]; 
+string strName[13]; 
+  
+dword hWindow;
+dword cxClient;
+dword cyClient;
+dword hdc;
+dword i;
+dword ptX;
+dword ptY; 
+
+const crBlue = $00FF0000;
+
+WNDCLASS wc; 
+MSG msg;
+PAINTSTRUCT ps;
+
+func OnSize(dword hwnd, dword message, dword wparam, dword lparam);
+    cxClient = LoWord(lparam);
+    cyClient = HiWord(lparam);
+    return(0);
+end;
+
+func OnPaint(dword hwnd, dword message, dword wparam, dword lparam);
+	hdc = BeginPaint(hwnd, @ps);
+
+	MoveToEx(hdc, 0, cyClient / 2, NULL);
+	LineTo(hdc, cxClient, cyClient / 2);
+
+	for (i = 0; i < 1000; i++) {
+		ptX = i * cxClient / 1000;
+		ptY = Sng2Int(Int2Sng(cyClient) / 2.0 * (1.0 - Sin(2.0 * Pi() * Int2Sng(i) / 1000.0)));
+		SetPixel(hdc,  ptX, ptY, crBlue);
+	}
+
+	EndPaint(hdc, @ps);
+	return(0);
+end;
+
+func OnDestroy(dword hwnd, dword message, dword wparam, dword lparam);
+    PostQuitMessage(0);
+    return(0);
+end;
+
+func WndProc(dword hwnd, dword message, dword wparam, dword lparam); 
+    if (message = WM_SIZE) {
+        return(OnSize(hwnd, message, wparam, lparam));
+    }
+    if (message = WM_PAINT) {
+        return(OnPaint(hwnd, message, wparam, lparam));
+    }
+    if (message = WM_DESTROY) { 
+        return(OnDestroy(hwnd, message, wparam, lparam));
+    } 
+    return(DefWindowProc(hwnd, message, wparam, lparam));
+end; 
+
+func main();  
+    strTitle = "Sine Wave Plot"; 
+    strName = "SineWavePlot"; 
+
+    wc.style = CS_HREDRAW | CS_VREDRAW; 
+    wc.lpfnWndProc = @WndProc; 
+    wc.cbClsExtra = 0; 
+    wc.cbWndExtra = 0; 
+    wc.hInstance = Instance; 
+    wc.hIcon = LoadIcon(0, IDI_APPLICATION); 
+    wc.hCursor = LoadCursor(0, IDC_ARROW); 
+    wc.hbrBackground = GetStockObject(WHITE_BRUSH);
+    wc.lpszMenuName = NULL; 
+    wc.lpszClassName = @strName;
+
+    if (RegisterClass(@wc) = 0) { 
+        MessageBox(0, "RegisterClass failed.", @strName, MB_OK); 
+        ExitProcess(0); 
+    } 
+
+    hWindow = CreateWindowEx(0, @strName, @strTitle,
+                             WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or 
+                             WS_MINIMIZEBOX or WS_MAXIMIZEBOX,
+                             CW_USEDEFAULT, CW_USEDEFAULT,
+                             380, 350,
+                             NULL, NULL, Instance, NULL);
+
+    if (hWindow = 0) { 
+        MessageBox(0, "CreateWindowEx failed.", @strTitle, MB_OK); 
+        UnregisterClass(@strName, 0); 
+        ExitProcess(0); 
+    } 
+
+    ShowWindow(hWindow, SW_SHOWNORMAL); 
+    UpdateWindow(hWindow); 
+
+    while (GetMessage(@msg, 0, 0, 0) > 0) { 
+        TranslateMessage(@msg); 
+        DispatchMessage(@msg); 
+    } 
+
+    UnregisterClass(@strName, 0); 
+end;

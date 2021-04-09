@@ -1,0 +1,28 @@
+// SystemInfo.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+type SYSTEM_INFO {
+    dword dwOemID;
+    dword dwPageSize;
+    dword lpMinimumApplicationAddress;
+    dword lpMaximumApplicationAddress;
+    dword dwActiveProcessorMask;
+    dword dwNumberOfProcessors;
+    dword dwProcessorType;
+    dword dwAllocationGranularity;
+    dword dwReserved;
+}
+
+SYSTEM_INFO SI;
+string buffer[256];
+
+frame main();
+    GetSystemInfo(@SI);
+    Format(buffer,
+           "dwOemID=%d\ndwPageSize=%d\nNumberOfProcessors=%d\nProcessorType=%d", 
+           SI.dwOemID,SI.dwPageSize,SI.dwNumberOfProcessors,SI.dwProcessorType);
+    MessageBox(0,buffer,"System.Info",1);
+end;

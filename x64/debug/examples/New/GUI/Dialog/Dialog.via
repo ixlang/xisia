@@ -1,0 +1,71 @@
+application PE GUI entry main;
+
+include "Windows.inc";
+
+MSG myMsg; WNDCLASS wc;
+
+// Window Procedure
+
+func MainWndProc(dword hwnd,dword message,dword wparam,dword lparam);
+	if (message = WM_CLOSE) {
+		if (MessageBox(0,"Really want to quit?","Linley",$24)=IDYES) {
+			MessageBox(0,"Bye Bye!\nHave a nice day! ^^","Linley",$20);
+			PostQuitMessage(0);
+		} else {
+			return(1);
+		}
+	}
+	if (message = WM_COMMAND) {
+		if (wparam = 0) {
+			MessageBox(0,"You actually clicked on Hello World!","Linley",$20);
+		}
+		if (wparam = 1) {
+			SendMessage(hwnd,WM_CLOSE,0,0);
+		}
+	}
+	return(DefWindowProc(hwnd,message,wparam,lparam));
+end;
+
+// Initialize Dialog
+
+func main();
+	var dword LinleyWnd;
+	var dword Font;
+	var dword ButtonI;
+	var dword ButtonII;
+	wc.style = $2+$1+$80;
+	wc.lpfnWndProc = @MainWndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = 0;
+	wc.hIcon = LoadIcon(0,32512);
+	wc.hCursor = LoadCursor(0,$7F00);
+	wc.hbrBackground = 15+1;
+	wc.lpszMenuName = "";
+	wc.lpszClassName = "LinleyClass";
+
+	if (RegisterClass(wc)=0) {
+		MessageBox(0,"Failed to register window!","Linley",0);
+		ExitProcess(0);
+	}
+
+	LinleyWnd	= CreateWindowEx($40000+$100,"LinleyClass","Linley Application",$4000000+$2000000+$CF0000+$10000000,200,200,450,320,0,0,0,0);
+	ButtonI	= CreateWindowEx($10000,"Button","Hello World!",$40000000+$10000000,20,20,100,50,LinleyWnd,0,0,0);
+	ButtonII	= CreateWindowEx($20000,"Button","Exit",$40000000+$10000000,250,230,180,50,LinleyWnd,1,0,0);
+	
+	if (LinleyWnd=0) {
+		MessageBox(0,"Failed to create window!","Linley",0);
+		UnregisterClass("LinleyClass",0);
+		ExitProcess(0);
+	}
+
+	while (GetMessage(myMsg,0,0,0)>0) {
+		TranslateMessage(myMsg);
+		DispatchMessage(myMsg);
+	}
+
+	UnregisterClass("LinleyClass",0);
+	ExitProcess(0);
+end;
+
+

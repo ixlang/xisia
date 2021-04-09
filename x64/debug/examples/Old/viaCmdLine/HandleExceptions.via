@@ -1,0 +1,36 @@
+// HandleExceptions.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+type SYSTEM_INFO {
+	dword dwOemID;
+	dword dwPageSize;
+	dword lpMinimumApplicationAddress;
+	dword lpMaximumApplicationAddress;
+	dword dwActiveProcessorMask;
+	dword dwNumberOfProcessors;
+	dword dwProcessorType;
+	dword dwAllocationGranularity;
+	dword dwReserved;
+}
+
+SYSTEM_INFO SI;
+string buffer[256];
+dword temp=200;
+
+frame ExceptionFilter(dword a,dword b);
+	Format(buffer,"catched exception.. %d; %d\nDo you wan't to continue?",a,b);
+	if(MessageBox(0,buffer,"Error..",$24)=6) {
+		MessageBox(0,"program is running again","Handled..",$20);
+		temp = @SI;
+		main();
+	} 
+end;
+
+frame main();
+	SetUnhandledExceptionFilter(@ExceptionFilter.Address);
+	GetSystemInfo(temp);
+	MessageBox(0,"I'll never come here..","System.Info",0);
+end;

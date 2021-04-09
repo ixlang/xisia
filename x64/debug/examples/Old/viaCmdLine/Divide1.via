@@ -1,0 +1,33 @@
+// Divide1.lnl
+
+application PE GUI entry main;
+
+import MessageBox ascii lib "USER32.DLL",4;
+
+string buffer[256];
+
+frame main();
+    local dword x;
+    local dword y;
+    local dword quotient;
+
+    x=9; y=3;
+    quotient = x/y;
+    Format(buffer,"%d / %d = %d",x,y,quotient);
+    MessageBox(0,buffer,"Divide1",0);
+    
+    x=2; y=3;
+    quotient = x/y;
+    Format(buffer,"%d / %d = %d",x,y,quotient);
+    MessageBox(0,buffer,"Divide1",0);
+    
+    x=9; y=4;
+    quotient = x/y;
+    Format(buffer,"%d / %d = %d",x,y,quotient);
+    MessageBox(0,buffer,"Divide1",0);
+
+    x=255; y=1;
+    quotient = x/y;
+    Format(buffer,"%d / %d = %d",x,y,quotient);
+    MessageBox(0,buffer,"Divide1",0);
+end;

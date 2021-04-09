@@ -1,0 +1,26 @@
+application PE GUI;
+
+import IsInitialized lib "MathLib.DLL",0;
+import MathMul lib "MathLib.DLL",2;
+import MathDiv lib "MathLib.DLL",2;
+import MathAdd lib "MathLib.DLL",2;
+import MathSub lib "MathLib.DLL",2;
+
+include "Windows.inc", "Conversion.inc";
+
+func DoMath();
+	if(IsInitialized()=TRUE) {
+		MessageBox(0,"Math Library Loaded.","DLL..",$20);
+	} else {
+		MessageBox(0,"Library could not be loaded","DLL..",$20);
+		return(0);
+	}
+	MessageBox(0,Int2Str(MathDiv(4,2)),"Division 4 / 2",$20);
+	MessageBox(0,Int2Str(MathAdd(6,2)),"Addition 6 + 2",$20);
+	MessageBox(0,Int2Str(MathSub(2,5)),"Subtraction 2 - 5",$20);
+	MessageBox(0,Int2Str(MathMul(5,2)),"Multiplication 5 * 2",$20);
+end;
+
+entry
+	DoMath();
+end.

@@ -1,0 +1,11 @@
+// UseIncludes.lnl
+
+application PE GUI;
+
+include "VBEmulated.h";
+
+entry
+
+    MsgBox("Hello World!",$20,"Template..");
+
+end.

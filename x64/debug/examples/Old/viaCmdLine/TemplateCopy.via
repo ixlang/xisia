@@ -1,0 +1,18 @@
+// TemplateCopy.lnl
+
+application PE GUI;
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+string tt[50];
+
+frame main();
+    MessageBox(0,"Hello World!","Template..",$20);
+end;
+
+entry
+    tt = "test";
+    if(tt="test") {
+        main();
+    }
+end.

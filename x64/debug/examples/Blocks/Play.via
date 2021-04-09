@@ -1,0 +1,31 @@
+application PE CUI;
+
+include "Windows.inc", "Console.inc";
+
+const lYellow	= $EF;
+const lBlue		= $9F;
+const lGreen	= $AF;
+const lRed		= $CF;
+
+entry
+	Console.Init("Linley Console");
+
+//	Block 1
+	Console.Color(lYellow); 
+	Console.Position(36,11);
+	Console.Write(" K ");
+//	Block 2
+	Console.Color(lBlue); 
+	Console.Position(39,11);
+	Console.Write(" I ");
+//	Block 3
+	Console.Color(lGreen); 
+	Console.Position(36,12);
+	Console.Write(" D ");
+//	Block 4
+	Console.Color(lRed); 
+	Console.Position(39,12);
+	Console.Write(" E \n");
+	Console.Color($00);
+	Console.Read();
+end.

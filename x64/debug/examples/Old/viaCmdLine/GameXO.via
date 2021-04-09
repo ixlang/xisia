@@ -1,0 +1,78 @@
+// GameXO.lnl
+
+application PE GUI entry main;
+
+// Includes ..
+
+include "win32a.inc";
+
+//Declares ..
+
+MSG myMsg; WNDCLASS wc;
+dword Button(),LinleyWindow,Font,i;
+string buffer; string CurrentPlayerSign[1]; string GetSign[1];
+
+frame WndProc(dword hwnd,dword message,dword wparam,dword lparam);
+    if(message=WM_DESTROY) {
+        PostQuitMessage(0);
+    }
+    if(message=WM_COMMAND) {
+        SendMessage(lparam,WM_GETTEXT,2,GetSign);   
+        if(GetSign <> "") { return(0); }
+        SendMessage(lparam,WM_SETTEXT,0,CurrentPlayerSign);
+        if (CurrentPlayerSign = "X") { CurrentPlayerSign = "O"; } else { CurrentPlayerSign = "X"; }
+    }
+    return(DefWindowProc(hwnd,message,wparam,lparam));
+end;
+
+frame main();
+    CurrentPlayerSign = "X";
+    wc.style = CS_HREDRAW+CS_VREDRAW+CS_PARENTDC;
+    wc.lpfnWndProc = @WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = 0;
+    wc.hIcon = LoadIcon(0,IDI_APPLICATION);
+    wc.hCursor = LoadCursor(0,$7F00);
+    wc.hbrBackground = 15+1;
+    wc.lpszMenuName = "";
+    wc.lpszClassName = "LinleyClass";
+
+    if(RegisterClass(wc)=0) {
+        MessageBox(0,"Failed to register window!","Linley",0);
+        ExitProcess(0);
+    }
+
+    reserve Button(9);
+
+    LinleyWindow= CreateWindowEx($40000+$100,"LinleyClass","XO by Kinex",$4000000+$2000000+$CF0000+$10000000 - WS_MAXIMIZEBOX,200,200,138,155,0,0,0,0);
+    Button(1)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,20,20,30,30,LinleyWindow,0,Instance,0);
+    Button(2)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,50,20,30,30,LinleyWindow,1,Instance,0);
+    Button(3)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,80,20,30,30,LinleyWindow,2,Instance,0);
+    Button(4)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,20,50,30,30,LinleyWindow,3,Instance,0);
+    Button(5)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,50,50,30,30,LinleyWindow,4,Instance,0);
+    Button(6)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,80,50,30,30,LinleyWindow,5,Instance,0);
+    Button(7)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,20,80,30,30,LinleyWindow,6,Instance,0);
+    Button(8)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,50,80,30,30,LinleyWindow,7,Instance,0);
+    Button(9)   = CreateWindowEx($10000,"Button","",$40000000+$10000000+$8000,80,80,30,30,LinleyWindow,8,Instance,0);   
+
+    Font = CreateFont(14,0,0,0,0,0,0,0,0,6,0,0,1+0,"Arial");
+
+    for(i=1;i<=9;i++) {
+        SendMessage(Button(i),$30,Font,0);
+    }
+
+    if(LinleyWindow=0) {
+        MessageBox(0,"Failed to create window!","Linley",0);
+        UnregisterClass("LinleyClass",Instance);
+        ExitProcess(0);
+    }
+
+    while(GetMessage(myMsg,0,0,0)<>0) {
+        TranslateMessage(@myMsg);
+        DispatchMessage(@myMsg);
+    }
+
+    UnregisterClass("LinleyClass",0);
+    ExitProcess(0);
+end;

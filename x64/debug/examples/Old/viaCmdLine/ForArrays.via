@@ -1,0 +1,23 @@
+// ForArrays.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+const HEAP_NO_SERIALIZE	 = 1;
+const HEAP_GENERATE_EXCEPTIONS = 4;
+const HEAP_ZERO_MEMORY = 8;
+
+frame main();
+	dword yo;
+	local dword dwHeapHandle;
+	local dword dwHeapAlloc;
+	dwHeapHandle = HeapCreate(0,0,0);
+	dwHeapAlloc = HeapAlloc(dwHeapHandle,HEAP_ZERO_MEMORY,2000);
+	yo = $20;
+	MoveMemory(dwHeapAlloc,@yo,4);
+	yo = 0;
+	MoveMemory(@yo,dwHeapAlloc,4);
+	MessageBox(0,"test","test",yo);
+// yo, free me 
+end;

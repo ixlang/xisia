@@ -1,0 +1,17 @@
+// Count.lnl
+
+application PE GUI entry main;
+
+import MessageBox alias MessageBoxA lib "USER32.DLL",4;
+
+frame main();
+    dword i; string sBuffer;
+
+    while(i<=10) {
+        Format(sBuffer,"i = %d",i);
+        MessageBox(0,sBuffer,"Count..",0);
+        i = i + 1;
+    }
+
+    MessageBox(0,"Done.","Linley",0); 
+end;

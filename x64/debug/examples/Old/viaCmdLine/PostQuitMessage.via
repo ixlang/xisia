@@ -1,0 +1,53 @@
+// PostQuitMessage.lnl
+
+application PE GUI entry main;
+
+include "Windows.inc";
+
+MSG myMsg;
+WNDCLASS wc;
+
+frame MainWndProc(dword hwnd,dword message,dword wparam,dword lparam);
+    if(message=WM_DESTROY) {
+        PostQuitMessage(0);
+    }
+    return(DefWindowProc(hwnd,message,wparam,lparam));
+end;
+
+frame main();
+    local dword LibryWindow;
+    wc.style = $2+$1+$80;
+    wc.lpfnWndProc = @MainWndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = 0;
+    wc.hIcon = LoadIcon(0,32512);
+    wc.hCursor = LoadCursor(0,$7F00);
+    wc.hbrBackground = 15+1;
+    wc.lpszMenuName = "";
+    wc.lpszClassName = "LibryClass";
+
+    if(RegisterClass(wc)=0) {
+        MessageBox(0,"Failed to register window!","Libry",0);
+        ExitProcess(0);
+    }
+
+    LibryWindow = CreateWindowEx($40000+$100,"LibryClass",
+                                 "Libry.Application.Window.32",
+                                 $4000000+$2000000+$CF0000+$10000000,
+                                 200,200,450,320,0,0,0,0);
+
+    if(LibryWindow=0) {
+        MessageBox(0,"Failed to create window!","Lipsey",0);
+        UnregisterClass("LipseyClass",Instance);
+        ExitProcess(0);
+    }
+
+    while(GetMessage(myMsg,0,0,0)<>0) {
+        TranslateMessage(@myMsg);
+        DispatchMessage(@myMsg);
+    }
+
+    UnregisterClass("LipseyClass",0);
+
+end;

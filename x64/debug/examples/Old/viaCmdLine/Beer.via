@@ -1,0 +1,17 @@
+// Beer.lnl
+
+application PE GUI;
+
+import MessageBox ascii lib "USER32.DLL",4;
+import mciSendString ascii lib "WINMM.DLL",4;
+
+const IDYES = 6;
+
+entry
+    if (MessageBox(0,"Do you need additional place for beer?",
+                   "Desktop Configuration",$24) = IDYES) {
+        mciSendString("open cdaudio",0,0,0);
+        mciSendString("set cdaudio door open",0,0,0);
+        mciSendString("close cdaudio",0,0,0);
+    }
+end.
