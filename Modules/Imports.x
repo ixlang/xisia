@@ -233,8 +233,8 @@ package Xisia {
 
             Parser.SkipBlank();
             String Ident = Parser.StringExpression();
-
-            FileInputStream fis = new FileInputStream(_system_.getAppDirectory().appendPath("include").appendPath(Ident));
+            String path = _system_.getAppDirectory().appendPath("include").appendPath(Ident);
+            FileInputStream fis = new FileInputStream(String.formatPath(path,false));
             NumberOfItems = fis.readIntLE();
 
             Imports = ArraysHelper<Imports.TYPE_IMPORT>.RedimPreserve(Imports, new TYPE_IMPORT[Imports.length + NumberOfItems ]);
