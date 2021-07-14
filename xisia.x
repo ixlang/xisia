@@ -38,7 +38,7 @@ int main(String [] args) {
                     i++;
 
                     while (i < args.length) {
-                        if (args[i].startWith("-") == false) {
+                        if (args[i].startsWith("-") == false) {
                             byte [] data = Resources.readData(args[i], 0);
 
                             if (data != nilptr) {

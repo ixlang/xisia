@@ -188,7 +188,7 @@ package Xisia {
                     int __e9 = D[i].IT[ii].RE.length - 1;
 
                     for (iii = 1; iii <= __e9; iii++) {
-                        if (D[i].IT[ii].RE[iii].FileName.startWith("\\")) {
+                        if (D[i].IT[ii].RE[iii].FileName.startsWith("\\")) {
                             D[i].IT[ii].RE[iii].FileName = "FileName" + D[i].IT[ii].RE[iii].FileName;
                         }
 
